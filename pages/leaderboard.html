@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puzzle Warriors — Leaderboard</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+</head>
+<body>
+<div class="scanline-wrap"></div>
+<div class="particles" id="stars"></div>
+<div class="toast" id="toast"></div>
+
+<div class="screen active" id="screen-leaderboard">
+  <div class="lb-title">🏆 LEADERBOARD</div>
+  <div class="lb-table-wrap">
+    <table class="lb-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>WARRIOR</th>
+          <th>WINS</th>
+          <th>LOSSES</th>
+        </tr>
+      </thead>
+      <tbody id="lb-body">
+        <tr>
+          <td colspan="4" style="text-align:center;color:var(--muted);padding:30px;">
+            LOADING...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <button class="btn btn-ghost" onclick="window.history.back()">← BACK</button>
+</div>
+
+<script src="../shared/eventBus.js"></script>
+<script src="../shared/state.js"></script>
+<script src="../shared/api.js"></script>
+<script src="../shared/sfx.js"></script>
+<script src="../shared/navigation.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="../shared/ui.js"></script>
+<script src="../shared/main.js"></script>
+<script>
+  async function loadLeaderboard() {
+    var tbody = document.getElementById('lb-body');
+    try {
+      var r = await API.getLeaderboard();
+      if (!r.ok || !r.data.leaderboard) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--fire);padding:20px;">Could not load leaderboard.</td></tr>';
+        return;
+      }
+      var players = r.data.leaderboard;
+      if (!players.length) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:30px;">No warriors yet. Be the first!</td></tr>';
+        return;
+      }
+      var medals = ['🥇','🥈','🥉'];
+      var me = State.getUser();
+      tbody.innerHTML = players.map(function(u, i) {
+        var rc   = i < 3 ? 'rank-' + (i+1) : '';
+        var isMe = me && u.username === me.username;
+        var rk   = i < 3 ? medals[i] : '#' + (i+1);
+        return '<tr class="' + (isMe ? 'me' : '') + '">' +
+          '<td class="lb-rank ' + rc + '">' + rk + '</td>' +
+          '<td>' + u.username + (isMe ? ' <span style="color:var(--gold)">(YOU)</span>' : '') + '</td>' +
+          '<td class="lb-wins">' + (u.wins||0) + '</td>' +
+          '<td style="color:var(--muted)">' + (u.losses||0) + '</td>' +
+          '</tr>';
+      }).join('');
+    } catch(e) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--fire);padding:20px;">Server offline.</td></tr>';
+    }
+  }
+
+  loadLeaderboard();
+</script>
+</body>
+</html>

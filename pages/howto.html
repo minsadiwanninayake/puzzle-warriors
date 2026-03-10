@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puzzle Warriors — How To Play</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+</head>
+<body>
+<div class="scanline-wrap"></div>
+<div class="particles" id="stars"></div>
+<div class="toast" id="toast"></div>
+
+<div class="screen active" id="screen-howto">
+  <div class="howto-title">📖 HOW TO PLAY</div>
+  <div class="howto-grid">
+    <div class="howto-card">
+      <div class="howto-icon">❤️</div>
+      <div class="howto-card-title">THE PUZZLE</div>
+      <p>Each round shows a Heart pattern image. Find the missing number (0–9) and tap it!</p>
+    </div>
+    <div class="howto-card">
+      <div class="howto-icon">🛡️</div>
+      <div class="howto-card-title">DEFEND</div>
+      <p>Press DEFEND and solve the puzzle to block incoming enemy damage completely.</p>
+    </div>
+    <div class="howto-card">
+      <div class="howto-icon">⏱️</div>
+      <div class="howto-card-title">TIMER</div>
+      <p>Each puzzle has a time limit. Running out of time counts as a wrong answer!</p>
+    </div>
+    <div class="howto-card">
+      <div class="howto-icon">💔</div>
+      <div class="howto-card-title">WRONG ANSWER</div>
+      <p>Incorrect answers reduce YOUR health. Think carefully before answering!</p>
+    </div>
+    <div class="howto-card">
+      <div class="howto-icon">👹</div>
+      <div class="howto-card-title">ENEMY AI</div>
+      <p>The enemy counter-attacks each round. Defend correctly to avoid damage.</p>
+    </div>
+    <div class="howto-card">
+      <div class="howto-icon">🏆</div>
+      <div class="howto-card-title">WIN CONDITION</div>
+      <p>Reduce enemy HP to 0. Don't let YOUR HP reach 0 first!</p>
+    </div>
+  </div>
+  <button class="btn btn-ghost" onclick="window.history.back()">← BACK</button>
+</div>
+
+<script src="../shared/eventBus.js"></script>
+<script src="../shared/state.js"></script>
+<script src="../shared/api.js"></script>
+<script src="../shared/sfx.js"></script>
+<script src="../shared/navigation.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="../shared/ui.js"></script>
+<script src="../shared/main.js"></script>
+</body>
+</html>

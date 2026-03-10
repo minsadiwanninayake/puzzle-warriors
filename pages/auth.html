@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puzzle Warriors — Login</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+</head>
+<body>
+<div class="scanline-wrap"></div>
+<div class="particles" id="stars"></div>
+<div class="toast" id="toast"></div>
+
+<div class="screen active" id="screen-auth">
+  <div class="auth-panel">
+    <div class="auth-logo">⚔ WARRIORS</div>
+    <div class="auth-sub">Enter the arena</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login"    onclick="Auth.switchTab('login')">LOGIN</button>
+      <button class="auth-tab"        id="tab-register" onclick="Auth.switchTab('register')">REGISTER</button>
+    </div>
+    <div id="auth-error" class="auth-error"></div>
+    <div id="form-login">
+      <div class="input-group">
+        <label>Username</label>
+        <input type="text" id="login-user" placeholder="Enter username" autocomplete="off">
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="login-pass" placeholder="••••••••">
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="Auth.login()">LOGIN →</button>
+    </div>
+    <div id="form-register" style="display:none">
+      <div class="input-group">
+        <label>Username</label>
+        <input type="text" id="reg-user" placeholder="Choose a username" autocomplete="off">
+      </div>
+      <div class="input-group">
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="your@email.com">
+      </div>
+      <div class="input-group">
+        <label>Password <span style="font-size:11px;color:var(--muted);font-weight:400;">(min 6 chars)</span></label>
+        <input type="password" id="reg-pass" placeholder="••••••••">
+      </div>
+      <button class="btn btn-green" style="width:100%;margin-top:8px" onclick="Auth.register()">CREATE ACCOUNT →</button>
+    </div>
+    <div class="auth-back">
+      <button class="btn btn-ghost" onclick="window.location.href='../index.html'">← BACK</button>
+    </div>
+  </div>
+</div>
+
+<script src="../shared/eventBus.js"></script>
+<script src="../shared/state.js"></script>
+<script src="../shared/api.js"></script>
+<script src="../shared/sfx.js"></script>
+<script src="../shared/navigation.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="../shared/ui.js"></script>
+<script src="../shared/main.js"></script>
+<script>
+  // If already logged in, skip to menu
+  if (State.isLoggedIn()) {
+    window.location.href = 'menu.html';
+  }
+
+  // Check if register tab should open
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('tab') === 'register') {
+    Auth.switchTab('register');
+  }
+
+  // Enter key support
+  document.getElementById('login-pass').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') Auth.login();
+  });
+  document.getElementById('login-user').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') Auth.login();
+  });
+</script>
+</body>
+</html>

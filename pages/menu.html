@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puzzle Warriors — Menu</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+</head>
+<body>
+<div class="scanline-wrap"></div>
+<div class="particles" id="stars"></div>
+<div class="toast" id="toast"></div>
+
+<div class="screen active" id="screen-menu">
+  <div class="menu-header">
+    <div class="menu-welcome">WELCOME BACK,</div>
+    <div class="menu-username" id="menu-username">WARRIOR</div>
+  </div>
+  <div class="stats-row">
+    <div class="stat-card wins">
+      <span class="stat-num" id="stat-wins">0</span>
+      <div class="stat-label">VICTORIES</div>
+    </div>
+    <div class="stat-card losses">
+      <span class="stat-num" id="stat-losses">0</span>
+      <div class="stat-label">DEFEATS</div>
+    </div>
+  </div>
+  <div class="menu-btns">
+    <button class="btn btn-primary"   onclick="window.location.href='warrior-select.html'">⚔ &nbsp; NEW BATTLE</button>
+    <button class="btn btn-secondary" onclick="window.location.href='leaderboard.html'">🏆 &nbsp; LEADERBOARD</button>
+    <div class="menu-divider"></div>
+    <button class="btn btn-ghost" onclick="window.location.href='howto.html'">📖 &nbsp; HOW TO PLAY</button>
+    <button class="btn btn-ghost" onclick="Auth.logout()">↩ &nbsp; LOGOUT</button>
+  </div>
+</div>
+
+<script src="../shared/eventBus.js"></script>
+<script src="../shared/state.js"></script>
+<script src="../shared/api.js"></script>
+<script src="../shared/sfx.js"></script>
+<script src="../shared/navigation.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="../shared/ui.js"></script>
+<script src="../shared/main.js"></script>
+<script>
+  // Auth guard — redirect to login if not logged in
+  if (!State.isLoggedIn()) {
+    window.location.href = 'auth.html';
+  }
+
+  // Load and display user stats
+  async function loadMenu() {
+    const user = State.getUser();
+    if (!user) return;
+
+    document.getElementById('menu-username').textContent = user.username.toUpperCase();
+    document.getElementById('stat-wins').textContent     = user.wins   || 0;
+    document.getElementById('stat-losses').textContent   = user.losses || 0;
+
+    // Refresh from server
+    try {
+      const r = await API.getMe();
+      if (r.ok && r.data.user) {
+        State.setUser(r.data.user);
+        document.getElementById('menu-username').textContent = r.data.user.username.toUpperCase();
+        document.getElementById('stat-wins').textContent     = r.data.user.wins   || 0;
+        document.getElementById('stat-losses').textContent   = r.data.user.losses || 0;
+      }
+    } catch(e) { /* server offline — use cached data */ }
+  }
+
+  loadMenu();
+</script>
+</body>
+</html>

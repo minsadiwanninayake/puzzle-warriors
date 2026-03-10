@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puzzle Warriors — Battle</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+</head>
+<body>
+<div class="scanline-wrap"></div>
+<div class="particles" id="stars"></div>
+<div class="toast" id="toast"></div>
+
+<div class="screen active" id="screen-battle" style="flex-direction:column;">
+  <div class="battle-top">
+    <div class="combatant">
+      <div class="combatant-name">⚔ <span id="battle-player-name">PLAYER</span></div>
+      <div class="hp-bar-wrap"><div class="hp-bar player-bar" id="player-hp-bar" style="width:100%"></div></div>
+      <div class="hp-text"><span class="current" id="player-hp-num">25</span> / 25 HP</div>
+    </div>
+    <div class="battle-vs">VS</div>
+    <div class="combatant" style="align-items:flex-end">
+      <div class="combatant-name" style="text-align:right">👹 <span id="battle-enemy-name">DARK MAGE</span></div>
+      <div class="hp-bar-wrap"><div class="hp-bar enemy-bar" id="enemy-hp-bar" style="width:100%"></div></div>
+      <div class="hp-text" style="text-align:right"><span class="current" id="enemy-hp-num">25</span> / 25 HP</div>
+    </div>
+  </div>
+
+  <div class="battle-arena">
+    <div class="fighter">
+      <div class="fighter-sprite" id="player-sprite">🧙</div>
+      <div class="fighter-label">YOU</div>
+    </div>
+    <div class="battle-log-float" id="battle-log">BATTLE START!</div>
+    <div class="fighter">
+      <div class="fighter-sprite enemy-sprite" id="enemy-sprite">👹</div>
+      <div class="fighter-label">ENEMY</div>
+    </div>
+    <div class="battle-ground"></div>
+  </div>
+
+  <div class="puzzle-zone">
+    <div class="puzzle-header">
+      <div class="action-type-badge attack" id="action-badge">⚔ ATTACK</div>
+      <div class="timer-display">
+        <span class="timer-num" id="timer-num">20</span>
+        <div class="timer-bar-wrap"><div class="timer-bar" id="timer-bar"></div></div>
+      </div>
+    </div>
+    <div class="puzzle-img-wrap" id="puzzle-img-wrap">
+      <div class="puzzle-loading" id="puzzle-loading">LOADING PUZZLE...</div>
+      <img id="puzzle-img" class="puzzle-img" style="display:none" alt="Heart puzzle">
+    </div>
+    <div class="puzzle-hint">❤ FIND THE MISSING NUMBER IN THE HEART PATTERN</div>
+    <div id="api-error" class="api-error-msg" style="display:none"></div>
+    <div class="puzzle-options" id="puzzle-options"></div>
+    <div class="action-btns">
+      <div class="action-btn-wrap">
+        <button class="btn btn-danger btn-sm" onclick="EventBus.emit('battle:doSetAction',{action:'attack'})">⚔ ATTACK</button>
+        <div class="action-hint">Solve to deal damage</div>
+      </div>
+      <div class="action-btn-wrap">
+        <button class="btn btn-outline-neon btn-sm" onclick="EventBus.emit('battle:doSetAction',{action:'defend'})">🛡 DEFEND</button>
+        <div class="action-hint">Solve to block damage</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../shared/eventBus.js"></script>
+<script src="../shared/state.js"></script>
+<script src="../shared/api.js"></script>
+<script src="../shared/sfx.js"></script>
+<script src="../shared/navigation.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="../shared/battle.js"></script>
+<script src="../shared/ui.js"></script>
+<script src="../shared/main.js"></script>
+<script>
+  // Auth guard
+  if (!State.isLoggedIn()) {
+    window.location.href = 'auth.html';
+  }
+
+  // Read difficulty saved by difficulty.html
+  var difficulty = sessionStorage.getItem('pw_difficulty') || 'normal';
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', function(e) {
+    if (e.key >= '0' && e.key <= '9') EventBus.emit('battle:doAnswer', { digit: parseInt(e.key) });
+    if (e.key === 'a' || e.key === 'A') EventBus.emit('battle:doSetAction', { action: 'attack' });
+    if (e.key === 'd' || e.key === 'D') EventBus.emit('battle:doSetAction', { action: 'defend' });
+  });
+
+  // Start battle after modules load
+  setTimeout(function() {
+    EventBus.emit('battle:start', { difficulty: difficulty });
+  }, 100);
+
+  // When battle ends, go to result page
+  EventBus.on('battle:end', function(data) {
+    sessionStorage.setItem('pw_result', JSON.stringify(data));
+    setTimeout(function() {
+      window.location.href = 'result.html';
+    }, 1200);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puzzle Warriors — Result</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+</head>
+<body>
+<div class="scanline-wrap"></div>
+<div class="particles" id="stars"></div>
+<div class="toast" id="toast"></div>
+
+<div class="screen active" id="screen-result">
+  <div class="result-icon" id="result-icon">🏆</div>
+  <div class="result-title" id="result-title">VICTORY!</div>
+  <div class="result-subtitle" id="result-subtitle">ENEMY DEFEATED</div>
+  <div class="result-stats">
+    <div class="result-stat-card">
+      <span class="result-stat-num" id="result-correct">0</span>
+      <div class="result-stat-label">CORRECT</div>
+    </div>
+    <div class="result-stat-card">
+      <span class="result-stat-num" id="result-wrong">0</span>
+      <div class="result-stat-label">WRONG</div>
+    </div>
+    <div class="result-stat-card">
+      <span class="result-stat-num" id="result-hp-left">0</span>
+      <div class="result-stat-label">HP LEFT</div>
+    </div>
+  </div>
+  <div class="result-btns">
+    <button class="btn btn-primary"   onclick="window.location.href='difficulty.html'">⚔ PLAY AGAIN</button>
+    <button class="btn btn-secondary" onclick="window.location.href='menu.html'">🏠 MAIN MENU</button>
+  </div>
+</div>
+
+<script src="../shared/eventBus.js"></script>
+<script src="../shared/state.js"></script>
+<script src="../shared/api.js"></script>
+<script src="../shared/sfx.js"></script>
+<script src="../shared/navigation.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="../shared/ui.js"></script>
+<script src="../shared/main.js"></script>
+<script>
+  // Auth guard
+  if (!State.isLoggedIn()) {
+    window.location.href = 'auth.html';
+  }
+
+  // Read result saved by battle.html
+  var resultData = null;
+  try {
+    resultData = JSON.parse(sessionStorage.getItem('pw_result'));
+  } catch(e) {}
+
+  if (!resultData) {
+    // No result data — go back to menu
+    window.location.href = 'menu.html';
+  } else {
+    var won   = resultData.won;
+    var stats = resultData.stats;
+
+    // Set background
+    document.getElementById('screen-result').className =
+      'screen active ' + (won ? 'win-bg' : 'lose-bg');
+
+    // Fill in result data
+    document.getElementById('result-icon').textContent    = won ? '🏆' : '💀';
+    document.getElementById('result-correct').textContent = stats.correct  || 0;
+    document.getElementById('result-wrong').textContent   = stats.wrong    || 0;
+    document.getElementById('result-hp-left').textContent = stats.playerHP >= 0 ? stats.playerHP : 0;
+
+    var title = document.getElementById('result-title');
+    title.textContent = won ? 'VICTORY!' : 'DEFEAT...';
+    title.className   = 'result-title ' + (won ? 'result-win' : 'result-lose');
+
+    document.getElementById('result-subtitle').textContent =
+      won ? 'ENEMY DEFEATED!' : 'YOU FELL IN BATTLE';
+
+    // Play sound after modules load
+    setTimeout(function() {
+      if (won) EventBus.emit('sfx:play', { name: 'victory' });
+      else     EventBus.emit('sfx:play', { name: 'defeat' });
+    }, 200);
+
+    // Clear so back button doesn't re-show stale result
+    sessionStorage.removeItem('pw_result');
+  }
+</script>
+</body>
+</html>

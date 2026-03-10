@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puzzle Warriors</title>
+  <link rel="stylesheet" href="shared/styles.css">
+  <style>
+    .splash-logo-wrap { position:relative; margin-bottom:12px; }
+    .splash-logo {
+      font-family:'Orbitron',monospace; font-weight:900;
+      font-size:clamp(28px,6vw,64px);
+      background:linear-gradient(135deg,#fff 0%,var(--neon) 40%,var(--neon2) 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+      line-height:1.1; letter-spacing:4px;
+      animation:neonFlicker 4s infinite;
+      filter:drop-shadow(0 0 30px rgba(0,212,255,.4));
+    }
+    .splash-logo .fire-word {
+      background:linear-gradient(135deg,var(--gold) 0%,var(--fire) 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+      filter:drop-shadow(0 0 20px rgba(255,68,68,.5));
+    }
+    .splash-logo-line {
+      display:block; width:100%; height:1px;
+      background:linear-gradient(90deg,transparent,var(--neon),var(--neon2),transparent);
+      margin:8px auto; animation:glowPulse 2s infinite;
+    }
+    .splash-tagline {
+      font-family:'Orbitron',monospace; font-size:11px; font-weight:400;
+      color:var(--muted2); letter-spacing:6px; text-transform:uppercase;
+      margin-bottom:56px;
+    }
+    .splash-hero {
+      font-size:90px; margin-bottom:52px;
+      animation:float 3s ease-in-out infinite;
+      filter:drop-shadow(0 0 30px rgba(123,47,255,.6));
+    }
+    .splash-btns {
+      display:flex; flex-direction:column; gap:14px; width:300px; position:relative; z-index:2;
+    }
+
+    /* Screen layout */
+    .screen {
+      display:none; min-height:100vh; position:relative; z-index:1;
+      animation:fadeUp .4s cubic-bezier(.16,1,.3,1);
+    }
+    .screen.active { display:flex; }
+    #screen-splash {
+      flex-direction:column; align-items:center; justify-content:center;
+      text-align:center; gap:0; padding:20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="scanline-wrap"></div>
+<div class="particles" id="stars"></div>
+<div class="toast" id="toast"></div>
+
+<div class="screen active" id="screen-splash">
+  <div class="splash-logo-wrap">
+    <div class="splash-logo">PUZZLE<br><span class="fire-word">WARRIORS</span></div>
+    <div class="splash-logo-line"></div>
+  </div>
+  <div class="splash-tagline">Solve &nbsp;★&nbsp; Fight &nbsp;★&nbsp; Conquer</div>
+  <div class="splash-hero">⚔️</div>
+  <div class="splash-btns">
+    <button class="btn btn-primary"   onclick="enterArena()">▶ &nbsp; ENTER THE ARENA</button>
+    <button class="btn btn-secondary" onclick="window.location.href='pages/howto.html'">HOW TO PLAY</button>
+    <button class="btn btn-ghost"     onclick="window.location.href='pages/leaderBoard.html'">🏆 &nbsp; LEADERBOARD</button>
+  </div>
+</div>
+
+<!-- Load shared scripts ONCE, in correct order -->
+<script src="shared/eventBus.js"></script>
+<script src="shared/state.js"></script>
+<script src="shared/api.js"></script>
+<script src="shared/sfx.js"></script>
+<script src="shared/navigation.js"></script>
+<script src="shared/auth.js"></script>
+<script src="shared/ui.js"></script>
+<script src="shared/main.js"></script>
+
+<script>
+  // If already logged in, skip splash and go straight to menu
+  if (State.isLoggedIn()) {
+    window.location.href = 'pages/menu.html';
+  }
+
+  function enterArena() {
+    if (State.isLoggedIn()) {
+      window.location.href = 'pages/menu.html';
+    } else {
+      window.location.href = 'pages/auth.html';
+    }
+  }
+</script>
+
+</body>
+</html>

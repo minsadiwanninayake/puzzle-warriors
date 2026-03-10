@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puzzle Warriors — Choose Warrior</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+</head>
+<body>
+<div class="scanline-wrap"></div>
+<div class="particles" id="stars"></div>
+<div class="toast" id="toast"></div>
+
+<div class="screen active" id="screen-warrior">
+  <div class="screen-title">⚔ CHOOSE YOUR WARRIOR</div>
+  <div class="screen-sub">Each warrior has a unique special ability</div>
+  <div class="warrior-cards">
+
+    <div class="warrior-card mage" id="wcard-mage" onclick="selectWarrior('mage')">
+      <div class="warrior-selected-badge">✅</div>
+      <span class="warrior-emoji">🧙</span>
+      <div class="warrior-name">MAGE</div>
+      <div class="warrior-class">Spellcaster</div>
+      <div class="warrior-stats">
+        <div class="warrior-stat-row"><span class="warrior-stat-label">ATK</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:90%"></div></div></div>
+        <div class="warrior-stat-row"><span class="warrior-stat-label">DEF</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:40%"></div></div></div>
+        <div class="warrior-stat-row"><span class="warrior-stat-label">SPD</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:70%"></div></div></div>
+      </div>
+      <div class="warrior-ability">✨ Arcane Surge: 3+ combo = 3× damage</div>
+    </div>
+
+    <div class="warrior-card knight" id="wcard-knight" onclick="selectWarrior('knight')">
+      <div class="warrior-selected-badge">✅</div>
+      <span class="warrior-emoji">🛡️</span>
+      <div class="warrior-name">KNIGHT</div>
+      <div class="warrior-class">Tank</div>
+      <div class="warrior-stats">
+        <div class="warrior-stat-row"><span class="warrior-stat-label">ATK</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:60%"></div></div></div>
+        <div class="warrior-stat-row"><span class="warrior-stat-label">DEF</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:95%"></div></div></div>
+        <div class="warrior-stat-row"><span class="warrior-stat-label">SPD</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:45%"></div></div></div>
+      </div>
+      <div class="warrior-ability">🛡 Iron Will: starts with 35 HP</div>
+    </div>
+
+    <div class="warrior-card archer" id="wcard-archer" onclick="selectWarrior('archer')">
+      <div class="warrior-selected-badge">✅</div>
+      <span class="warrior-emoji">🏹</span>
+      <div class="warrior-name">ARCHER</div>
+      <div class="warrior-class">Ranger</div>
+      <div class="warrior-stats">
+        <div class="warrior-stat-row"><span class="warrior-stat-label">ATK</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:75%"></div></div></div>
+        <div class="warrior-stat-row"><span class="warrior-stat-label">DEF</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:55%"></div></div></div>
+        <div class="warrior-stat-row"><span class="warrior-stat-label">SPD</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:95%"></div></div></div>
+      </div>
+      <div class="warrior-ability">⚡ Swift Shot: +5s on every correct answer</div>
+    </div>
+
+    <div class="warrior-card ninja" id="wcard-ninja" onclick="selectWarrior('ninja')">
+      <div class="warrior-selected-badge">✅</div>
+      <span class="warrior-emoji">🥷</span>
+      <div class="warrior-name">NINJA</div>
+      <div class="warrior-class">Assassin</div>
+      <div class="warrior-stats">
+        <div class="warrior-stat-row"><span class="warrior-stat-label">ATK</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:80%"></div></div></div>
+        <div class="warrior-stat-row"><span class="warrior-stat-label">DEF</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:35%"></div></div></div>
+        <div class="warrior-stat-row"><span class="warrior-stat-label">SPD</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:90%"></div></div></div>
+      </div>
+      <div class="warrior-ability">🌑 Shadow Dodge: 30% chance to evade</div>
+    </div>
+
+    <div class="warrior-card berserker" id="wcard-berserker" onclick="selectWarrior('berserker')">
+      <div class="warrior-selected-badge">✅</div>
+      <span class="warrior-emoji">🪓</span>
+      <div class="warrior-name">BERSERKER</div>
+      <div class="warrior-class">Rage Fighter</div>
+      <div class="warrior-stats">
+        <div class="warrior-stat-row"><span class="warrior-stat-label">ATK</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:100%"></div></div></div>
+        <div class="warrior-stat-row"><span class="warrior-stat-label">DEF</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:25%"></div></div></div>
+        <div class="warrior-stat-row"><span class="warrior-stat-label">SPD</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:60%"></div></div></div>
+      </div>
+      <div class="warrior-ability">🔥 Blood Rage: 2× damage when HP ≤ 10</div>
+    </div>
+
+  </div>
+  <div class="warrior-confirm-row">
+    <div class="warrior-chosen-preview" id="warrior-preview">← Select a warrior to continue</div>
+    <button class="btn btn-primary" id="btn-confirm-warrior"
+      onclick="confirmWarrior()"
+      disabled style="width:260px;opacity:0.35">SELECT &amp; CONTINUE →</button>
+    <button class="btn btn-ghost" onclick="window.location.href='menu.html'">← BACK</button>
+  </div>
+</div>
+
+<script src="../shared/eventBus.js"></script>
+<script src="../shared/state.js"></script>
+<script src="../shared/api.js"></script>
+<script src="../shared/sfx.js"></script>
+<script src="../shared/navigation.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="../shared/ui.js"></script>
+<script src="../shared/main.js"></script>
+<script>
+  // Auth guard
+  if (!State.isLoggedIn()) {
+    window.location.href = 'auth.html';
+  }
+
+  function selectWarrior(id) {
+    // Remove selected from all cards
+    document.querySelectorAll('.warrior-card').forEach(c => c.classList.remove('selected'));
+    // Add selected to clicked card
+    document.getElementById('wcard-' + id).classList.add('selected');
+
+    // Save to State
+    State.setSelectedWarrior(id);
+
+    // Update preview text
+    const w = State.getWarrior(id);
+    const preview = document.getElementById('warrior-preview');
+    if (preview && w) {
+      preview.innerHTML = 'Selected: <span>' + w.emoji + ' ' + w.name + '</span> — ' + w.ability;
+    }
+
+    // Enable confirm button
+    const btn = document.getElementById('btn-confirm-warrior');
+    btn.disabled = false;
+    btn.style.opacity = '1';
+
+    EventBus.emit('sfx:play', { name: 'click' });
+    EventBus.emit('sfx:play', { name: 'powerUp' });
+  }
+
+  function confirmWarrior() {
+    if (!State.getSelectedWarrior()) return;
+    EventBus.emit('sfx:play', { name: 'click' });
+    window.location.href = 'difficulty.html';
+  }
+</script>
+</body>
+</html>
