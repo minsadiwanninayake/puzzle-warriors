@@ -1,97 +1,325 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Puzzle Warriors — Choose Warrior</title>
-  <link rel="stylesheet" href="../shared/styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Puzzle Warriors — Choose Your Warrior</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=Rajdhani:wght@300;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/styles.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;min-height:100%;background:#000;font-family:'Rajdhani',sans-serif;cursor:none;overflow-x:hidden;}
+
+/* ── CURSOR ── */
+.cursor{position:fixed;width:20px;height:20px;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);}
+.cursor-inner{width:6px;height:6px;background:#ff9a00;border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 0 10px #ff9a00,0 0 20px #ff6600;}
+.cursor-outer{width:20px;height:20px;border:1px solid rgba(255,154,0,.5);border-radius:50%;position:absolute;top:0;left:0;animation:cp 2s ease infinite;}
+@keyframes cp{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.4);opacity:.2}}
+.cursor.cl .cursor-inner{transform:translate(-50%,-50%) scale(2);background:#fff;}
+
+/* ── BG ── */
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+#ember-canvas{position:fixed;inset:0;z-index:1;pointer-events:none;}
+.vignette{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse 85% 85% at 50% 50%,transparent 20%,rgba(0,0,0,.85) 100%);}
+.scan{position:fixed;inset:0;z-index:2;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 3px);}
+
+/* ── PAGE ── */
+.page{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:28px 20px 48px;}
+
+/* ── HEADER ── */
+.page-header{text-align:center;margin-bottom:28px;opacity:0;transform:translateY(-20px);animation:hIn .8s cubic-bezier(.16,1,.3,1) .1s forwards;}
+@keyframes hIn{to{opacity:1;transform:translateY(0)}}
+.page-rune{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:6px;color:rgba(255,150,0,.3);margin-bottom:8px;}
+.page-title{font-family:'Uncial Antiqua',serif;font-size:clamp(22px,4vw,44px);letter-spacing:5px;
+  background:linear-gradient(180deg,#fff8e0 0%,#ffcc44 25%,#ff8800 60%,#cc4400 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 22px rgba(255,120,0,.6));}
+.page-sub{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:5px;color:rgba(255,200,100,.3);margin-top:6px;}
+.page-rule{height:2px;width:0%;margin:10px auto 0;background:linear-gradient(90deg,transparent,#ff8800,#ffcc00,#ff8800,transparent);box-shadow:0 0 10px #ff6600;animation:ruleX .7s ease .6s forwards;}
+@keyframes ruleX{to{width:60%;}}
+
+/* ── WARRIOR GRID ── */
+.warrior-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:14px;width:100%;max-width:900px;
+  margin-bottom:24px;
+}
+@media(max-width:760px){.warrior-grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:480px){.warrior-grid{grid-template-columns:repeat(2,1fr);}}
+
+/* ── WARRIOR CARD ── */
+.warrior-card{
+  position:relative;
+  background:linear-gradient(165deg,#130a00 0%,#0a0500 50%,#0e0310 100%);
+  border:1px solid rgba(255,100,0,.2);
+  padding:20px 14px 16px;text-align:center;overflow:hidden;
+  clip-path:polygon(10px 0%,calc(100% - 10px) 0%,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0% calc(100% - 10px),0% 10px);
+  cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s;
+  opacity:0;transform:translateY(24px) scale(.92);
+}
+.warrior-card:nth-child(1){animation:cardIn .5s ease .5s forwards;}
+.warrior-card:nth-child(2){animation:cardIn .5s ease .62s forwards;}
+.warrior-card:nth-child(3){animation:cardIn .5s ease .74s forwards;}
+.warrior-card:nth-child(4){animation:cardIn .5s ease .86s forwards;}
+.warrior-card:nth-child(5){animation:cardIn .5s ease .98s forwards;}
+@keyframes cardIn{to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* Per-warrior accent colors */
+.warrior-card.mage      .card-accent{background:linear-gradient(90deg,transparent,#aa44ff,transparent);}
+.warrior-card.knight    .card-accent{background:linear-gradient(90deg,transparent,#4488ff,transparent);}
+.warrior-card.archer    .card-accent{background:linear-gradient(90deg,transparent,#44ff88,transparent);}
+.warrior-card.ninja     .card-accent{background:linear-gradient(90deg,transparent,#aaaaaa,transparent);}
+.warrior-card.berserker .card-accent{background:linear-gradient(90deg,transparent,#ff4400,transparent);}
+
+.card-accent{position:absolute;top:0;left:0;right:0;height:2px;opacity:.5;transition:opacity .2s;}
+
+/* Corner brackets */
+.warrior-card::before,.warrior-card::after{content:'';position:absolute;width:10px;height:10px;border-color:rgba(255,150,50,.25);border-style:solid;transition:all .2s;}
+.warrior-card::before{top:4px;left:4px;border-width:1px 0 0 1px;}
+.warrior-card::after{bottom:4px;right:4px;border-width:0 1px 1px 0;}
+
+/* HOVER state */
+.warrior-card:hover{transform:translateY(-6px) scale(1.03);border-color:rgba(255,150,0,.45);box-shadow:0 0 35px rgba(180,60,0,.25),0 20px 40px rgba(0,0,0,.5);}
+.warrior-card:hover .card-accent{opacity:1;}
+.warrior-card:hover::before,.warrior-card:hover::after{border-color:rgba(255,180,80,.5);width:16px;height:16px;}
+.warrior-card:hover .warrior-emoji{transform:scale(1.15) translateY(-4px);}
+
+/* SELECTED state */
+.warrior-card.selected{border-color:rgba(255,200,0,.7);box-shadow:0 0 40px rgba(200,100,0,.4),0 0 80px rgba(150,50,0,.2),inset 0 0 30px rgba(100,30,0,.2);}
+.warrior-card.selected .card-accent{opacity:1;animation:accentPulse 2s ease infinite;}
+@keyframes accentPulse{0%,100%{opacity:.7;box-shadow:none}50%{opacity:1;box-shadow:0 0 15px rgba(255,180,0,.6)}}
+.warrior-card.selected::before,.warrior-card.selected::after{border-color:rgba(255,200,80,.7);width:16px;height:16px;}
+.warrior-card.selected .warrior-emoji{animation:selectedBob 2s ease-in-out infinite;}
+@keyframes selectedBob{0%,100%{transform:scale(1.1) translateY(0)}50%{transform:scale(1.15) translateY(-6px)}}
+
+/* Selected badge */
+.selected-badge{
+  position:absolute;top:8px;right:8px;
+  width:20px;height:20px;border-radius:50%;
+  background:linear-gradient(135deg,#ff8800,#ffcc00);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:#000;font-weight:700;
+  opacity:0;transform:scale(0);transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 0 10px rgba(255,180,0,.6);
+  z-index:2;
+}
+.warrior-card.selected .selected-badge{opacity:1;transform:scale(1);}
+
+/* Emoji */
+.warrior-emoji{font-size:46px;display:block;margin-bottom:10px;transition:transform .25s;
+  filter:drop-shadow(0 0 8px rgba(255,100,0,.4));
+  animation:iconFloat 3s ease-in-out infinite;}
+.warrior-card:nth-child(1) .warrior-emoji{animation-delay:0s;}
+.warrior-card:nth-child(2) .warrior-emoji{animation-delay:.6s;}
+.warrior-card:nth-child(3) .warrior-emoji{animation-delay:1.2s;}
+.warrior-card:nth-child(4) .warrior-emoji{animation-delay:1.8s;}
+.warrior-card:nth-child(5) .warrior-emoji{animation-delay:2.4s;}
+@keyframes iconFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+.warrior-name{font-family:'Uncial Antiqua',serif;font-size:13px;letter-spacing:2px;color:#ffcc88;margin-bottom:2px;}
+.warrior-class{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:3px;color:rgba(255,200,100,.3);margin-bottom:12px;}
+
+/* Stat bars */
+.stat-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.stat-lbl{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:2px;color:rgba(255,200,100,.4);width:24px;flex-shrink:0;}
+.stat-track{flex:1;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;}
+.stat-fill{height:100%;border-radius:2px;width:0%;transition:width 1s cubic-bezier(.4,0,.2,1);background:linear-gradient(90deg,#cc4400,#ff8800,#ffcc00);}
+/* Per-warrior stat colors */
+.warrior-card.mage      .stat-fill{background:linear-gradient(90deg,#6600aa,#aa44ff,#cc88ff);}
+.warrior-card.knight    .stat-fill{background:linear-gradient(90deg,#002288,#4488ff,#88bbff);}
+.warrior-card.archer    .stat-fill{background:linear-gradient(90deg,#006622,#44ff88,#88ffbb);}
+.warrior-card.ninja     .stat-fill{background:linear-gradient(90deg,#444,#aaa,#ddd);}
+.warrior-card.berserker .stat-fill{background:linear-gradient(90deg,#880000,#ff4400,#ff8800);}
+
+/* Ability */
+.warrior-ability{
+  font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:500;
+  color:rgba(255,200,150,.4);line-height:1.4;margin-top:10px;
+  border-top:1px solid rgba(255,100,0,.1);padding-top:8px;
+  transition:color .2s;
+}
+.warrior-card:hover .warrior-ability,.warrior-card.selected .warrior-ability{color:rgba(255,220,170,.7);}
+
+/* ── CONFIRM ROW ── */
+.confirm-row{
+  width:100%;max-width:900px;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  opacity:0;animation:fadeUp .5s ease 1.1s forwards;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Preview strip */
+.warrior-preview{
+  height:48px;display:flex;align-items:center;justify-content:center;
+  width:100%;max-width:600px;
+  background:rgba(0,0,0,.5);border:1px solid rgba(255,100,0,.15);
+  font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:500;
+  color:rgba(255,200,100,.35);letter-spacing:2px;
+  clip-path:polygon(6px 0%,calc(100% - 6px) 0%,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0% calc(100% - 6px),0% 6px);
+  transition:all .3s;
+}
+.warrior-preview.has-selection{
+  border-color:rgba(255,150,0,.4);
+  color:rgba(255,220,150,.8);
+  background:rgba(80,25,0,.25);
+  box-shadow:0 0 20px rgba(150,60,0,.2);
+}
+.warrior-preview .preview-emoji{font-size:18px;}
+.warrior-preview .preview-name{font-family:'Uncial Antiqua',serif;color:#ffcc88;letter-spacing:3px;}
+.warrior-preview .preview-ability{color:rgba(255,200,100,.5);font-size:11px;margin-left:6px;}
+
+/* Action buttons */
+.action-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+
+.forge-btn{
+  position:relative;height:54px;min-width:160px;border:none;cursor:pointer;
+  font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;letter-spacing:5px;text-transform:uppercase;
+  overflow:hidden;transition:transform .12s,filter .15s,opacity .2s;
+  clip-path:polygon(8px 0%,calc(100% - 8px) 0%,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0% calc(100% - 8px),0% 8px);
+  display:flex;align-items:center;justify-content:center;padding:0 22px;
+}
+.forge-btn:hover:not(:disabled){transform:scale(1.04);filter:brightness(1.2);}
+.forge-btn:active:not(:disabled){transform:scale(.96);}
+.forge-btn::before,.forge-btn::after{content:'';position:absolute;width:8px;height:8px;border-color:rgba(255,255,255,.35);border-style:solid;transition:width .2s,height .2s;}
+.forge-btn::before{top:3px;left:3px;border-width:1.5px 0 0 1.5px;}
+.forge-btn::after{bottom:3px;right:3px;border-width:0 1.5px 1.5px 0;}
+.forge-btn:hover:not(:disabled)::before,.forge-btn:hover:not(:disabled)::after{width:14px;height:14px;}
+
+.forge-btn.primary{background:linear-gradient(135deg,#2a0800,#6a1800,#2a0800);background-size:200%;color:#ffcc88;box-shadow:0 0 0 1px rgba(200,60,0,.5),0 0 30px rgba(180,40,0,.3);}
+.forge-btn.primary:not(:disabled){animation:bgPulse 4s ease infinite;}
+@keyframes bgPulse{0%,100%{background-position:0%}50%{background-position:100%}}
+.forge-btn.primary:hover:not(:disabled){box-shadow:0 0 0 1px rgba(255,150,0,.8),0 0 50px rgba(255,80,0,.45);}
+.forge-btn.primary:disabled{opacity:.28;cursor:not-allowed;}
+
+.forge-btn.primary .sweep{position:absolute;top:0;left:-100%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,180,50,.2),transparent);animation:btnSwp 3s ease infinite 4s;}
+@keyframes btnSwp{0%{left:-100%}50%,100%{left:150%}}
+.forge-btn.primary::after{border-color:rgba(255,180,80,.35);}
+
+.forge-btn.ghost{background:rgba(255,255,255,.03);color:rgba(255,255,255,.35);box-shadow:0 0 0 1px rgba(255,255,255,.08);}
+.forge-btn.ghost:hover{color:rgba(255,220,150,.7);box-shadow:0 0 0 1px rgba(255,200,100,.2);}
+
+/* ── SELECTION BURST FX ── */
+.burst-particle{position:fixed;border-radius:50%;pointer-events:none;z-index:999;animation:bOut .6s ease-out forwards;}
+@keyframes bOut{to{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0;}}
+
+/* ── TOAST ── */
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;
+  background:rgba(10,3,0,.95);border:1px solid rgba(255,100,0,.4);padding:10px 24px;
+  font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:3px;color:#ffcc88;
+  opacity:0;transition:opacity .3s;pointer-events:none;
+  clip-path:polygon(6px 0%,calc(100% - 6px) 0%,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0% calc(100% - 6px),0% 6px);}
+#toast.show{opacity:1;}
+</style>
 </head>
 <body>
-<div class="scanline-wrap"></div>
-<div class="particles" id="stars"></div>
-<div class="toast" id="toast"></div>
 
-<div class="screen active" id="screen-warrior">
-  <div class="screen-title">⚔ CHOOSE YOUR WARRIOR</div>
-  <div class="screen-sub">Each warrior has a unique special ability</div>
-  <div class="warrior-cards">
+<div class="cursor" id="cursor"><div class="cursor-outer"></div><div class="cursor-inner"></div></div>
 
+<canvas id="bg-canvas"></canvas>
+<canvas id="ember-canvas"></canvas>
+<div class="vignette"></div>
+<div class="scan"></div>
+<div id="toast"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="page-rune">⚔ ᚲᚺᚩᚩᛋᛖ ᚤᚩᚢᚱ ᚹᚨᚱᚱᛁᚩᚱ ⚔</div>
+    <div class="page-title">Choose Your Warrior</div>
+    <div class="page-sub">EACH WARRIOR HAS A UNIQUE SPECIAL ABILITY</div>
+    <div class="page-rule"></div>
+  </div>
+
+  <!-- WARRIOR CARDS -->
+  <div class="warrior-grid">
+
+    <!-- MAGE -->
     <div class="warrior-card mage" id="wcard-mage" onclick="selectWarrior('mage')">
-      <div class="warrior-selected-badge">✅</div>
+      <div class="card-accent"></div>
+      <div class="selected-badge">✦</div>
       <span class="warrior-emoji">🧙</span>
-      <div class="warrior-name">MAGE</div>
-      <div class="warrior-class">Spellcaster</div>
-      <div class="warrior-stats">
-        <div class="warrior-stat-row"><span class="warrior-stat-label">ATK</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:90%"></div></div></div>
-        <div class="warrior-stat-row"><span class="warrior-stat-label">DEF</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:40%"></div></div></div>
-        <div class="warrior-stat-row"><span class="warrior-stat-label">SPD</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:70%"></div></div></div>
-      </div>
+      <div class="warrior-name">Mage</div>
+      <div class="warrior-class">SPELLCASTER</div>
+      <div class="stat-row"><span class="stat-lbl">ATK</span><div class="stat-track"><div class="stat-fill" data-w="90"></div></div></div>
+      <div class="stat-row"><span class="stat-lbl">DEF</span><div class="stat-track"><div class="stat-fill" data-w="40"></div></div></div>
+      <div class="stat-row"><span class="stat-lbl">SPD</span><div class="stat-track"><div class="stat-fill" data-w="70"></div></div></div>
       <div class="warrior-ability">✨ Arcane Surge: 3+ combo = 3× damage</div>
     </div>
 
+    <!-- KNIGHT -->
     <div class="warrior-card knight" id="wcard-knight" onclick="selectWarrior('knight')">
-      <div class="warrior-selected-badge">✅</div>
+      <div class="card-accent"></div>
+      <div class="selected-badge">✦</div>
       <span class="warrior-emoji">🛡️</span>
-      <div class="warrior-name">KNIGHT</div>
-      <div class="warrior-class">Tank</div>
-      <div class="warrior-stats">
-        <div class="warrior-stat-row"><span class="warrior-stat-label">ATK</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:60%"></div></div></div>
-        <div class="warrior-stat-row"><span class="warrior-stat-label">DEF</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:95%"></div></div></div>
-        <div class="warrior-stat-row"><span class="warrior-stat-label">SPD</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:45%"></div></div></div>
-      </div>
+      <div class="warrior-name">Knight</div>
+      <div class="warrior-class">TANK</div>
+      <div class="stat-row"><span class="stat-lbl">ATK</span><div class="stat-track"><div class="stat-fill" data-w="60"></div></div></div>
+      <div class="stat-row"><span class="stat-lbl">DEF</span><div class="stat-track"><div class="stat-fill" data-w="95"></div></div></div>
+      <div class="stat-row"><span class="stat-lbl">SPD</span><div class="stat-track"><div class="stat-fill" data-w="45"></div></div></div>
       <div class="warrior-ability">🛡 Iron Will: starts with 35 HP</div>
     </div>
 
+    <!-- ARCHER -->
     <div class="warrior-card archer" id="wcard-archer" onclick="selectWarrior('archer')">
-      <div class="warrior-selected-badge">✅</div>
+      <div class="card-accent"></div>
+      <div class="selected-badge">✦</div>
       <span class="warrior-emoji">🏹</span>
-      <div class="warrior-name">ARCHER</div>
-      <div class="warrior-class">Ranger</div>
-      <div class="warrior-stats">
-        <div class="warrior-stat-row"><span class="warrior-stat-label">ATK</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:75%"></div></div></div>
-        <div class="warrior-stat-row"><span class="warrior-stat-label">DEF</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:55%"></div></div></div>
-        <div class="warrior-stat-row"><span class="warrior-stat-label">SPD</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:95%"></div></div></div>
-      </div>
+      <div class="warrior-name">Archer</div>
+      <div class="warrior-class">RANGER</div>
+      <div class="stat-row"><span class="stat-lbl">ATK</span><div class="stat-track"><div class="stat-fill" data-w="75"></div></div></div>
+      <div class="stat-row"><span class="stat-lbl">DEF</span><div class="stat-track"><div class="stat-fill" data-w="55"></div></div></div>
+      <div class="stat-row"><span class="stat-lbl">SPD</span><div class="stat-track"><div class="stat-fill" data-w="95"></div></div></div>
       <div class="warrior-ability">⚡ Swift Shot: +5s on every correct answer</div>
     </div>
 
+    <!-- NINJA -->
     <div class="warrior-card ninja" id="wcard-ninja" onclick="selectWarrior('ninja')">
-      <div class="warrior-selected-badge">✅</div>
+      <div class="card-accent"></div>
+      <div class="selected-badge">✦</div>
       <span class="warrior-emoji">🥷</span>
-      <div class="warrior-name">NINJA</div>
-      <div class="warrior-class">Assassin</div>
-      <div class="warrior-stats">
-        <div class="warrior-stat-row"><span class="warrior-stat-label">ATK</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:80%"></div></div></div>
-        <div class="warrior-stat-row"><span class="warrior-stat-label">DEF</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:35%"></div></div></div>
-        <div class="warrior-stat-row"><span class="warrior-stat-label">SPD</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:90%"></div></div></div>
-      </div>
+      <div class="warrior-name">Ninja</div>
+      <div class="warrior-class">ASSASSIN</div>
+      <div class="stat-row"><span class="stat-lbl">ATK</span><div class="stat-track"><div class="stat-fill" data-w="80"></div></div></div>
+      <div class="stat-row"><span class="stat-lbl">DEF</span><div class="stat-track"><div class="stat-fill" data-w="35"></div></div></div>
+      <div class="stat-row"><span class="stat-lbl">SPD</span><div class="stat-track"><div class="stat-fill" data-w="90"></div></div></div>
       <div class="warrior-ability">🌑 Shadow Dodge: 30% chance to evade</div>
     </div>
 
+    <!-- BERSERKER -->
     <div class="warrior-card berserker" id="wcard-berserker" onclick="selectWarrior('berserker')">
-      <div class="warrior-selected-badge">✅</div>
+      <div class="card-accent"></div>
+      <div class="selected-badge">✦</div>
       <span class="warrior-emoji">🪓</span>
-      <div class="warrior-name">BERSERKER</div>
-      <div class="warrior-class">Rage Fighter</div>
-      <div class="warrior-stats">
-        <div class="warrior-stat-row"><span class="warrior-stat-label">ATK</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:100%"></div></div></div>
-        <div class="warrior-stat-row"><span class="warrior-stat-label">DEF</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:25%"></div></div></div>
-        <div class="warrior-stat-row"><span class="warrior-stat-label">SPD</span><div class="warrior-stat-bar-bg"><div class="warrior-stat-bar-fill" style="width:60%"></div></div></div>
-      </div>
+      <div class="warrior-name">Berserker</div>
+      <div class="warrior-class">RAGE FIGHTER</div>
+      <div class="stat-row"><span class="stat-lbl">ATK</span><div class="stat-track"><div class="stat-fill" data-w="100"></div></div></div>
+      <div class="stat-row"><span class="stat-lbl">DEF</span><div class="stat-track"><div class="stat-fill" data-w="25"></div></div></div>
+      <div class="stat-row"><span class="stat-lbl">SPD</span><div class="stat-track"><div class="stat-fill" data-w="60"></div></div></div>
       <div class="warrior-ability">🔥 Blood Rage: 2× damage when HP ≤ 10</div>
     </div>
 
   </div>
-  <div class="warrior-confirm-row">
-    <div class="warrior-chosen-preview" id="warrior-preview">← Select a warrior to continue</div>
-    <button class="btn btn-primary" id="btn-confirm-warrior"
-      onclick="confirmWarrior()"
-      disabled style="width:260px;opacity:0.35">SELECT &amp; CONTINUE →</button>
-    <button class="btn btn-ghost" onclick="window.location.href='menu.html'">← BACK</button>
+
+  <!-- CONFIRM STRIP -->
+  <div class="confirm-row">
+    <div class="warrior-preview" id="warrior-preview">
+      ← SELECT A WARRIOR TO CONTINUE
+    </div>
+    <div class="action-row">
+      <button class="forge-btn primary" id="btn-confirm" onclick="confirmWarrior()" disabled>
+        <div class="sweep"></div>
+        <span style="position:relative;z-index:1">SELECT &amp; CONTINUE →</span>
+      </button>
+      <button class="forge-btn ghost" onclick="window.location.href='menu.html'">← BACK</button>
+    </div>
   </div>
+
 </div>
 
-<script src="../shared/eventBus.js"></script>
+<script src="../shared/eventbus.js"></script>
 <script src="../shared/state.js"></script>
 <script src="../shared/api.js"></script>
 <script src="../shared/sfx.js"></script>
@@ -100,41 +328,120 @@
 <script src="../shared/ui.js"></script>
 <script src="../shared/main.js"></script>
 <script>
-  // Auth guard
-  if (!State.isLoggedIn()) {
-    window.location.href = 'auth.html';
+if(!State.isLoggedIn()) window.location.href='auth.html';
+
+/* ── CURSOR ── */
+var cur=document.getElementById('cursor');
+document.addEventListener('mousemove',function(e){cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';});
+document.addEventListener('mousedown',function(){cur.classList.add('cl');});
+document.addEventListener('mouseup',function(){cur.classList.remove('cl');});
+
+/* ── ANIMATE STAT BARS on load ── */
+setTimeout(function(){
+  document.querySelectorAll('.stat-fill').forEach(function(el){
+    var w=el.getAttribute('data-w');
+    el.style.width=w+'%';
+  });
+},600);
+
+/* ── WARRIOR DATA ── */
+var WARRIORS={
+  mage:     {emoji:'🧙', name:'Mage',      ability:'✨ Arcane Surge: 3+ combo = 3× damage'},
+  knight:   {emoji:'🛡️', name:'Knight',    ability:'🛡 Iron Will: starts with 35 HP'},
+  archer:   {emoji:'🏹', name:'Archer',    ability:'⚡ Swift Shot: +5s on every correct answer'},
+  ninja:    {emoji:'🥷', name:'Ninja',     ability:'🌑 Shadow Dodge: 30% chance to evade'},
+  berserker:{emoji:'🪓', name:'Berserker', ability:'🔥 Blood Rage: 2× damage when HP ≤ 10'},
+};
+
+/* ── BURST PARTICLES on selection ── */
+function doBurst(card){
+  var rect=card.getBoundingClientRect();
+  var cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+  var colors=['#ffcc00','#ff8800','#ff4400','#ffee88','#ff6600'];
+  for(var i=0;i<14;i++){
+    var p=document.createElement('div');p.className='burst-particle';
+    var angle=Math.random()*Math.PI*2, dist=30+Math.random()*55;
+    var sz=Math.random()*5+2;
+    p.style.cssText='width:'+sz+'px;height:'+sz+'px;background:'+colors[Math.floor(Math.random()*colors.length)]+';top:'+cy+'px;left:'+cx+'px;--tx:'+(Math.cos(angle)*dist)+'px;--ty:'+(Math.sin(angle)*dist)+'px;box-shadow:0 0 6px currentColor;';
+    document.body.appendChild(p);
+    setTimeout(function(el){document.body.removeChild(el);},600,p);
   }
+}
 
-  function selectWarrior(id) {
-    // Remove selected from all cards
-    document.querySelectorAll('.warrior-card').forEach(c => c.classList.remove('selected'));
-    // Add selected to clicked card
-    document.getElementById('wcard-' + id).classList.add('selected');
+/* ── SELECT WARRIOR ── */
+function selectWarrior(id){
+  document.querySelectorAll('.warrior-card').forEach(function(c){c.classList.remove('selected');});
+  var card=document.getElementById('wcard-'+id);
+  card.classList.add('selected');
+  doBurst(card);
 
-    // Save to State
-    State.setSelectedWarrior(id);
+  State.setSelectedWarrior(id);
 
-    // Update preview text
-    const w = State.getWarrior(id);
-    const preview = document.getElementById('warrior-preview');
-    if (preview && w) {
-      preview.innerHTML = 'Selected: <span>' + w.emoji + ' ' + w.name + '</span> — ' + w.ability;
-    }
+  /* Update preview */
+  var w=WARRIORS[id];
+  var prev=document.getElementById('warrior-preview');
+  prev.innerHTML='<span class="preview-emoji">'+w.emoji+'</span> &nbsp; <span class="preview-name">'+w.name.toUpperCase()+'</span> <span class="preview-ability">— '+w.ability+'</span>';
+  prev.classList.add('has-selection');
 
-    // Enable confirm button
-    const btn = document.getElementById('btn-confirm-warrior');
-    btn.disabled = false;
-    btn.style.opacity = '1';
+  /* Enable confirm */
+  var btn=document.getElementById('btn-confirm');
+  btn.disabled=false;
 
-    EventBus.emit('sfx:play', { name: 'click' });
-    EventBus.emit('sfx:play', { name: 'powerUp' });
+  EventBus.emit('sfx:play',{name:'click'});
+  EventBus.emit('sfx:play',{name:'powerUp'});
+}
+
+function confirmWarrior(){
+  if(!State.getSelectedWarrior())return;
+  EventBus.emit('sfx:play',{name:'click'});
+  window.location.href='difficulty.html';
+}
+
+/* ── FIRE BG ── */
+(function(){
+  var C=document.getElementById('bg-canvas'),ctx=C.getContext('2d'),W,H,pts=[],t=0;
+  function resize(){W=C.width=innerWidth;H=C.height=innerHeight;}
+  addEventListener('resize',resize);resize();
+  for(var i=0;i<130;i++) pts.push({x:Math.random()*W,y:H+Math.random()*150,r:Math.random()*2.5+.4,vx:(Math.random()-.5)*.4,vy:-(Math.random()*1.2+.3),life:Math.random(),max:Math.random()*.65+.3,hue:Math.random()*25+5});
+  function draw(){
+    ctx.clearRect(0,0,W,H);t++;
+    var bg=ctx.createRadialGradient(W/2,H*.85,0,W/2,H*.4,H*.9);
+    bg.addColorStop(0,'rgba(70,18,0,.28)');bg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    pts.forEach(function(p){
+      p.life+=.011;if(p.life>p.max){p.y=H+20;p.x=Math.random()*W;p.life=0;p.max=Math.random()*.65+.3;}
+      var pg=p.life/p.max,a=pg<.2?pg/.2:pg>.7?(1-pg)/.3:1;a*=.72;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r*(1-pg*.5),0,Math.PI*2);
+      ctx.fillStyle='hsla('+(p.hue+pg*15)+','+(85-pg*25)+'%,'+(65-pg*35)+'%,'+a+')';ctx.fill();
+      p.x+=p.vx+Math.sin(t*.02+p.y*.01)*.3;p.y+=p.vy;
+    });
+    requestAnimationFrame(draw);
   }
+  draw();
+})();
 
-  function confirmWarrior() {
-    if (!State.getSelectedWarrior()) return;
-    EventBus.emit('sfx:play', { name: 'click' });
-    window.location.href = 'difficulty.html';
+/* ── EMBERS ── */
+(function(){
+  var C=document.getElementById('ember-canvas'),ctx=C.getContext('2d'),W,H,em=[];
+  function resize(){W=C.width=innerWidth;H=C.height=innerHeight;}
+  addEventListener('resize',resize);resize();
+  for(var i=0;i<50;i++) em.push({x:Math.random()*W,y:H+Math.random()*H,vx:(Math.random()-.5)*.7,vy:-(Math.random()*1.3+.4),r:Math.random()*2+.4,a:Math.random()*.4+.1,c:Math.random()>.5?'255,120,30':'255,200,60'});
+  var mx=-1,my=-1;
+  document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY;});
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    em.forEach(function(e){
+      e.a-=.003;if(e.a<=0){e.x=Math.random()*W;e.y=H+10;e.a=.5+Math.random()*.4;}
+      if(mx>=0){var dx=e.x-mx,dy=e.y-my,d=Math.sqrt(dx*dx+dy*dy);if(d<110){e.vx+=dx/d*.06;e.vy+=dy/d*.02;}}
+      e.x+=e.vx;e.y+=e.vy;e.vx*=.985;
+      ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,Math.PI*2);
+      ctx.fillStyle='rgba('+e.c+','+e.a+')';ctx.fill();
+      if(e.r>1.2&&e.a>.25){ctx.beginPath();ctx.moveTo(e.x-e.r*3,e.y);ctx.lineTo(e.x+e.r*3,e.y);ctx.moveTo(e.x,e.y-e.r*3);ctx.lineTo(e.x,e.y+e.r*3);ctx.strokeStyle='rgba('+e.c+','+e.a*.4+')';ctx.lineWidth=.5;ctx.stroke();}
+    });
+    requestAnimationFrame(draw);
   }
+  draw();
+})();
 </script>
 </body>
 </html>
