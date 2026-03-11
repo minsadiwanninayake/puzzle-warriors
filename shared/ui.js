@@ -267,6 +267,32 @@ const UI = (function () {
     });
     EventBus.on('battle:dodge', function() { animateFighter('player', 'attacking'); });
     EventBus.on('battle:log',   function(d) { showBattleLog(d.message); });
+
+    // ── Power-up button counts ──────────────────────────
+    EventBus.on('battle:powerupsUpdate', function(d) {
+      ['shield','rage','heal','freeze'].forEach(function(type) {
+        var btn = el('pu-' + type);
+        var cnt = el('pu-count-' + type);
+        if (!btn || !cnt) return;
+        var n = d.powerups[type] || 0;
+        cnt.textContent = n;
+        cnt.className   = 'pu-count' + (n === 0 ? ' zero' : '');
+        btn.disabled    = (n === 0);
+      });
+    });
+
+    // ── Heal flash on HP bar ────────────────────────────
+    EventBus.on('battle:playerHeal', function(d) {
+      var maxHP = State.getBattle() ? State.getBattle().maxPlayerHP : 25;
+      var bar   = el('player-hp-bar');
+      var num   = el('player-hp-num');
+      if (bar) {
+        bar.style.width = Math.min(100, (d.hp / maxHP) * 100) + '%';
+        bar.classList.add('heal-flash');
+        setTimeout(function() { bar.classList.remove('heal-flash'); }, 600);
+      }
+      if (num) num.textContent = d.hp;
+    });
   }
 
   return { init: init, showToast: showToast };

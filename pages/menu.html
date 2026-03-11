@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Puzzle Warriors — Menu</title>
   <link rel="stylesheet" href="../shared/styles.css">
+  <style>
+    .quote-mini {
+      max-width:300px;text-align:center;
+      font-size:12px;color:var(--muted);line-height:1.6;font-style:italic;
+      border-left:2px solid var(--neon2);padding-left:10px;
+    }
+  </style>
 </head>
 <body>
 <div class="scanline-wrap"></div>
@@ -16,6 +23,7 @@
     <div class="menu-welcome">WELCOME BACK,</div>
     <div class="menu-username" id="menu-username">WARRIOR</div>
   </div>
+
   <div class="stats-row">
     <div class="stat-card wins">
       <span class="stat-num" id="stat-wins">0</span>
@@ -26,16 +34,22 @@
       <div class="stat-label">DEFEATS</div>
     </div>
   </div>
+
   <div class="menu-btns">
-    <button class="btn btn-primary"   onclick="window.location.href='warrior-select.html'">⚔ &nbsp; NEW BATTLE</button>
+    <button class="btn btn-primary" onclick="window.location.href='warrior-select.html'">⚔ &nbsp; NEW BATTLE</button>
     <button class="btn btn-secondary" onclick="window.location.href='leaderboard.html'">🏆 &nbsp; LEADERBOARD</button>
     <div class="menu-divider"></div>
     <button class="btn btn-ghost" onclick="window.location.href='howto.html'">📖 &nbsp; HOW TO PLAY</button>
+    <button class="btn btn-ghost" id="btn-shop" onclick="window.location.href='shop.html'">🏪 &nbsp; POWER-UP SHOP &nbsp;<span id="menu-coin-badge" style="background:rgba(255,184,0,.15);color:var(--gold);font-size:9px;padding:2px 8px;border-radius:8px;font-family:Orbitron,monospace;letter-spacing:1px;">🪙 0</span></button>
     <button class="btn btn-ghost" onclick="Auth.logout()">↩ &nbsp; LOGOUT</button>
   </div>
+
+  <!-- Mini motivational quote -->
+  <div class="quote-mini" id="quote-mini" style="opacity:0;transition:opacity .8s"></div>
 </div>
 
-<script src="../shared/eventBus.js"></script>
+<!-- FIX: eventbus.js (lowercase b) to match actual filename -->
+<script src="../shared/eventbus.js"></script>
 <script src="../shared/state.js"></script>
 <script src="../shared/api.js"></script>
 <script src="../shared/sfx.js"></script>
@@ -44,31 +58,36 @@
 <script src="../shared/ui.js"></script>
 <script src="../shared/main.js"></script>
 <script>
-  // Auth guard — redirect to login if not logged in
-  if (!State.isLoggedIn()) {
-    window.location.href = 'auth.html';
-  }
+  if (!State.isLoggedIn()) window.location.href = 'auth.html';
 
-  // Load and display user stats
   async function loadMenu() {
-    const user = State.getUser();
+    // FIX: Read username from State immediately so it shows before API call completes
+    var user = State.getUser();
     if (!user) return;
 
-    document.getElementById('menu-username').textContent = user.username.toUpperCase();
+    document.getElementById('menu-username').textContent = (user.username || 'WARRIOR').toUpperCase();
     document.getElementById('stat-wins').textContent     = user.wins   || 0;
     document.getElementById('stat-losses').textContent   = user.losses || 0;
 
-    // Refresh from server
+    // Refresh stats from server in the background
     try {
-      const r = await API.getMe();
+      var r = await API.getMe();
       if (r.ok && r.data.user) {
         State.setUser(r.data.user);
         document.getElementById('menu-username').textContent = r.data.user.username.toUpperCase();
         document.getElementById('stat-wins').textContent     = r.data.user.wins   || 0;
         document.getElementById('stat-losses').textContent   = r.data.user.losses || 0;
       }
-    } catch(e) { /* server offline — use cached data */ }
+    } catch(e) { /* server offline — cached data already shown */ }
   }
+
+  // FIX: Removed API.getWarriorQuote() — that method doesn't exist and was crashing the page
+  // Coin badge
+  (function() {
+    var coins = parseInt(localStorage.getItem('pw_coins') || '0', 10);
+    var badge = document.getElementById('menu-coin-badge');
+    if (badge) badge.textContent = '🪙 ' + coins;
+  })();
 
   loadMenu();
 </script>

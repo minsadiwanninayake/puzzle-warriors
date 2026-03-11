@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puzzle Warriors — Shop</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+  <style>
+    #screen-shop { flex-direction:column;align-items:center;padding:40px 20px;gap:24px; }
+
+    .shop-title {
+      font-family:'Orbitron',monospace;font-size:clamp(16px,3vw,26px);font-weight:900;
+      background:linear-gradient(135deg,var(--gold),var(--fire));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      letter-spacing:3px;text-align:center;
+    }
+    .coin-balance {
+      display:flex;align-items:center;gap:12px;
+      background:rgba(255,184,0,.08);border:1px solid rgba(255,184,0,.3);
+      border-radius:12px;padding:14px 28px;
+      font-family:'Orbitron',monospace;
+    }
+    .coin-amount { font-size:32px;font-weight:900;color:var(--gold); }
+    .coin-label  { font-size:10px;color:var(--muted2);letter-spacing:2px; }
+
+    .inventory-bar { display:flex;gap:12px;flex-wrap:wrap;justify-content:center; }
+    .inv-chip {
+      display:flex;align-items:center;gap:6px;
+      background:rgba(255,255,255,.04);border:1px solid var(--border);
+      border-radius:20px;padding:6px 14px;
+      font-family:'Orbitron',monospace;font-size:10px;color:var(--muted2);
+    }
+    .inv-chip .inv-count { color:var(--neon);font-weight:700;font-size:13px; }
+
+    .shop-grid {
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:16px;width:100%;max-width:860px;
+    }
+    .shop-card {
+      background:rgba(10,10,18,.95);border:1px solid var(--border);
+      border-radius:14px;padding:24px 20px;text-align:center;
+      transition:border-color .25s,transform .25s;
+    }
+    .shop-card:hover { transform:translateY(-4px);border-color:rgba(255,184,0,.4); }
+
+    .shop-item-emoji { font-size:48px;display:block;margin-bottom:12px; }
+    .shop-item-name  { font-family:'Orbitron',monospace;font-size:11px;font-weight:700;color:var(--gold);letter-spacing:2px;margin-bottom:6px; }
+    .shop-item-desc  { font-size:13px;color:var(--muted2);line-height:1.6;margin-bottom:12px;min-height:42px; }
+    .shop-item-owned { font-family:'Orbitron',monospace;font-size:9px;color:var(--neon2);letter-spacing:1px;margin-bottom:12px; }
+
+    .buy-btn {
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      width:100%;padding:12px;cursor:pointer;
+      background:linear-gradient(135deg,rgba(255,184,0,.2),rgba(255,184,0,.08));
+      border:1px solid rgba(255,184,0,.5);border-radius:8px;
+      font-family:'Orbitron',monospace;font-size:11px;font-weight:700;
+      color:var(--gold);letter-spacing:2px;transition:all .2s;
+    }
+    .buy-btn:hover { background:linear-gradient(135deg,rgba(255,184,0,.35),rgba(255,184,0,.2));box-shadow:0 0 20px rgba(255,184,0,.3); }
+    .buy-btn:disabled { opacity:.35;cursor:not-allowed; }
+
+    @keyframes buyFlash { 0%,100%{box-shadow:none}50%{box-shadow:0 0 40px rgba(255,184,0,.6) inset} }
+    .buy-success { animation:buyFlash .4s ease; }
+
+    .shop-divider {
+      width:100%;max-width:860px;text-align:center;
+      font-family:'Orbitron',monospace;font-size:9px;color:var(--muted);
+      letter-spacing:3px;border-top:1px solid var(--border);padding-top:16px;
+    }
+  </style>
+</head>
+<body>
+<div class="scanline-wrap"></div>
+<div class="particles" id="stars"></div>
+<div class="toast" id="toast"></div>
+
+<div class="screen active" id="screen-shop">
+
+  <div class="shop-title">🏪 POWER-UP SHOP</div>
+
+  <div class="coin-balance">
+    <span style="font-size:28px">🪙</span>
+    <div>
+      <div class="coin-amount" id="coin-display">0</div>
+      <div class="coin-label">COINS AVAILABLE</div>
+    </div>
+  </div>
+
+  <div class="inventory-bar">
+    <div class="inv-chip">🛡 Shield: <span class="inv-count" id="inv-shield">0</span></div>
+    <div class="inv-chip">🔥 Fury: <span class="inv-count" id="inv-rage">0</span></div>
+    <div class="inv-chip">💚 Heal: <span class="inv-count" id="inv-heal">0</span></div>
+    <div class="inv-chip">❄️ Freeze: <span class="inv-count" id="inv-freeze">0</span></div>
+  </div>
+
+  <div class="shop-grid">
+    <div class="shop-card" id="card-shield">
+      <span class="shop-item-emoji">🛡</span>
+      <div class="shop-item-name">IRON SHIELD</div>
+      <div class="shop-item-desc">Blocks the next hit completely — even timeout damage</div>
+      <div class="shop-item-owned">Owned: <span id="owned-shield">0</span></div>
+      <button class="buy-btn" id="buy-shield">BUY &nbsp;🪙 30</button>
+    </div>
+    <div class="shop-card" id="card-rage">
+      <span class="shop-item-emoji">🔥</span>
+      <div class="shop-item-name">FURY BOOST</div>
+      <div class="shop-item-desc">Your next correct attack deals 3× damage instead of normal</div>
+      <div class="shop-item-owned">Owned: <span id="owned-rage">0</span></div>
+      <button class="buy-btn" id="buy-rage">BUY &nbsp;🪙 40</button>
+    </div>
+    <div class="shop-card" id="card-heal">
+      <span class="shop-item-emoji">💚</span>
+      <div class="shop-item-name">HEALING POTION</div>
+      <div class="shop-item-desc">Instantly restores 8 HP during battle — use anytime</div>
+      <div class="shop-item-owned">Owned: <span id="owned-heal">0</span></div>
+      <button class="buy-btn" id="buy-heal">BUY &nbsp;🪙 25</button>
+    </div>
+    <div class="shop-card" id="card-freeze">
+      <span class="shop-item-emoji">❄️</span>
+      <div class="shop-item-name">ICE BLAST</div>
+      <div class="shop-item-desc">Freezes the enemy — skip their counter-attack on a wrong answer</div>
+      <div class="shop-item-owned">Owned: <span id="owned-freeze">0</span></div>
+      <button class="buy-btn" id="buy-freeze">BUY &nbsp;🪙 35</button>
+    </div>
+  </div>
+
+  <div class="shop-divider">POWER-UPS CARRY INTO YOUR NEXT BATTLE</div>
+
+  <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center">
+    <button class="btn btn-primary" id="go-battle-btn">⚔ GO TO BATTLE →</button>
+    <button class="btn btn-ghost"   onclick="window.location.href='difficulty.html'">← BACK</button>
+  </div>
+
+</div>
+
+<script src="../shared/eventBus.js"></script>
+<script src="../shared/state.js"></script>
+<script src="../shared/api.js"></script>
+<script src="../shared/sfx.js"></script>
+<script src="../shared/navigation.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="../shared/ui.js"></script>
+<script src="../shared/main.js"></script>
+<script>
+  if (!State.isLoggedIn()) { window.location.href = 'auth.html'; }
+
+  // ── Prices ───────────────────────────────────────────
+  var PRICES = { shield: 30, rage: 40, heal: 25, freeze: 35 };
+  var NAMES  = { shield: 'Iron Shield', rage: 'Fury Boost', heal: 'Healing Potion', freeze: 'Ice Blast' };
+
+  // ── Direct localStorage helpers ──────────────────────
+  function readCoins() {
+    var raw = localStorage.getItem('pw_coins');
+    var n   = parseInt(raw, 10);
+    return isNaN(n) ? 0 : n;
+  }
+  function writeCoins(n) {
+    localStorage.setItem('pw_coins', String(Math.max(0, n)));
+  }
+  function readInv() {
+    try {
+      var obj = JSON.parse(localStorage.getItem('pw_inventory'));
+      if (obj && typeof obj === 'object') return obj;
+    } catch(e) {}
+    return { shield: 0, rage: 0, heal: 0, freeze: 0 };
+  }
+  function writeInv(inv) {
+    localStorage.setItem('pw_inventory', JSON.stringify(inv));
+  }
+
+  // ── Refresh UI ───────────────────────────────────────
+  function refreshUI() {
+    var coins = readCoins();
+    var inv   = readInv();
+
+    document.getElementById('coin-display').textContent = coins;
+
+    ['shield', 'rage', 'heal', 'freeze'].forEach(function(type) {
+      var owned = inv[type] || 0;
+      document.getElementById('inv-'   + type).textContent   = owned;
+      document.getElementById('owned-' + type).textContent   = owned;
+      var btn = document.getElementById('buy-' + type);
+      if (coins >= PRICES[type]) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      } else {
+        btn.disabled = true;
+        btn.style.opacity = '0.35';
+      }
+    });
+  }
+
+  // ── Buy item ─────────────────────────────────────────
+  function buyItem(type) {
+    var price = PRICES[type];
+    var coins = readCoins();
+
+    if (coins < price) {
+      alert('Not enough coins! You have ' + coins + ' but need ' + price + '.');
+      return;
+    }
+
+    writeCoins(coins - price);
+
+    var inv = readInv();
+    inv[type] = (inv[type] || 0) + 1;
+    writeInv(inv);
+
+    // Flash card
+    var card = document.getElementById('card-' + type);
+    card.classList.add('buy-success');
+    setTimeout(function() { card.classList.remove('buy-success'); }, 400);
+
+    refreshUI();
+  }
+
+  // ── Wire up buttons (no inline onclick — avoids any scope issues) ──
+  document.getElementById('buy-shield').addEventListener('click', function() { buyItem('shield'); });
+  document.getElementById('buy-rage'  ).addEventListener('click', function() { buyItem('rage');   });
+  document.getElementById('buy-heal'  ).addEventListener('click', function() { buyItem('heal');   });
+  document.getElementById('buy-freeze').addEventListener('click', function() { buyItem('freeze'); });
+  document.getElementById('go-battle-btn').addEventListener('click', function() {
+    window.location.href = 'battle.html';
+  });
+
+  // ── Init ─────────────────────────────────────────────
+  refreshUI();
+</script>
+</body>
+</html>

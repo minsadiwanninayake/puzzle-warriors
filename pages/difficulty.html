@@ -53,10 +53,18 @@
 
   function chooseDifficulty(difficulty) {
     EventBus.emit('sfx:play', { name: 'click' });
-    // Save difficulty so battle.html can read it
     sessionStorage.setItem('pw_difficulty', difficulty);
-    window.location.href = 'battle.html';
+    window.location.href = "shop.html";
   }
+
+  // Show daily challenge indicator if coming from daily button
+  (function() {
+    var isDaily = sessionStorage.getItem('pw_daily_run');
+    if (isDaily) {
+      var title = document.querySelector('.screen-title');
+      if (title) title.textContent = '🏅 DAILY CHALLENGE — SELECT DIFFICULTY';
+    }
+  })();
 </script>
 </body>
 </html>

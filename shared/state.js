@@ -1,7 +1,6 @@
 // ═══════════════════════════════════════════════════════
-// state.js  —  Virtual Identity & Global State Store
-// Uses localStorage and sessionStorage so state
-// survives across multiple HTML pages.
+// state.js  —  Global State Store
+// Added: coin balance + owned power-ups
 // ═══════════════════════════════════════════════════════
 const State = (function () {
 
@@ -61,10 +60,56 @@ const State = (function () {
   }
   function clearBattle()     { sessionStorage.removeItem('pw_battle'); }
 
+  // ── 🪙 COINS ──────────────────────────────────────────
+  function getCoins() {
+    return parseInt(localStorage.getItem('pw_coins') || '0', 10);
+  }
+  function setCoins(n) {
+    localStorage.setItem('pw_coins', Math.max(0, n).toString());
+  }
+  function addCoins(n) {
+    setCoins(getCoins() + n);
+    return getCoins();
+  }
+  function spendCoins(n) {
+    if (getCoins() < n) return false;
+    setCoins(getCoins() - n);
+    return true;
+  }
+
+  // ── 🎒 OWNED POWER-UPS (inventory) ───────────────────
+  // Stored as { shield:0, rage:0, heal:0, freeze:0 }
+  function getInventory() {
+    try {
+      return JSON.parse(localStorage.getItem('pw_inventory') || '{"shield":0,"rage":0,"heal":0,"freeze":0}');
+    } catch(e) {
+      return { shield:0, rage:0, heal:0, freeze:0 };
+    }
+  }
+  function setInventory(inv) {
+    localStorage.setItem('pw_inventory', JSON.stringify(inv));
+  }
+  function addToInventory(type, qty) {
+    var inv = getInventory();
+    inv[type] = (inv[type] || 0) + (qty || 1);
+    setInventory(inv);
+  }
+  // Called at battle start — loads inventory into battle powerups
+  function consumeInventoryForBattle() {
+    var inv = getInventory();
+    // Zero out inventory (they're being used in battle)
+    setInventory({ shield:0, rage:0, heal:0, freeze:0 });
+    return inv;
+  }
+
   return {
     getWarrior, getAllWarriors, setSelectedWarrior, getSelectedWarrior,
     getConstants, getDifficulty,
     getUser, setUser, saveToken, getToken, isLoggedIn, clearSession,
     getBattle, setBattle, updateBattle, clearBattle,
+    // Coins
+    getCoins, setCoins, addCoins, spendCoins,
+    // Inventory
+    getInventory, setInventory, addToInventory, consumeInventoryForBattle,
   };
 })();
