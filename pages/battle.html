@@ -5,605 +5,331 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Puzzle Warriors — Battle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=Rajdhani:wght@500;600;700&family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../shared/styles.css">
   <style>
-    :root {
-      --pl-col: #00ffaa;
-      --en-col: #ff4455;
-      --gold:   #ffd60a;
-      --bg:     #08080f;
-      --panel:  rgba(255,255,255,0.04);
-      --glass:  rgba(255,255,255,0.06);
-    }
+    :root{--pl-col:#00aaff;--en-col:#4488ff;--gold:#ffd60a;--bg:#06030a;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html,body{background:var(--bg);font-family:'Rajdhani',sans-serif;overflow:hidden;height:100vh;width:100vw;cursor:none;}
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* ── CURSOR ── */
+    .cursor{position:fixed;width:20px;height:20px;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);}
+    .cursor-inner{width:6px;height:6px;background:#00aaff;border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 0 10px #00aaff,0 0 20px #0066ff;}
+    .cursor-outer{width:20px;height:20px;border:1px solid rgba(255,154,0,.5);border-radius:50%;position:absolute;top:0;left:0;animation:cp 2s ease infinite;}
+    @keyframes cp{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.4);opacity:.2}}
+    .cursor.cl .cursor-inner{transform:translate(-50%,-50%) scale(2);background:#fff;}
 
-    body {
-      background: var(--bg);
-      font-family: 'Rajdhani', sans-serif;
-      overflow: hidden;
-      height: 100vh;
-      width: 100vw;
-    }
-
-    /* ── Animated BG ─────────────────────── */
-    .battle-bg {
-      position: fixed; inset: 0; z-index: 0;
+    /* ── BG ── */
+    #bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+    .battle-bg{position:fixed;inset:0;z-index:0;
       background:
-        radial-gradient(ellipse 80% 50% at 20% 60%, rgba(0,255,170,0.07) 0%, transparent 60%),
-        radial-gradient(ellipse 80% 50% at 80% 40%, rgba(255,44,85,0.07) 0%, transparent 60%),
-        radial-gradient(ellipse 100% 80% at 50% 100%, rgba(123,47,255,0.12) 0%, transparent 70%),
-        #08080f;
-    }
-    .battle-bg-grid {
-      position: fixed; inset: 0; z-index: 0;
-      background-image:
-        linear-gradient(rgba(0,255,170,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,255,170,0.03) 1px, transparent 1px);
-      background-size: 60px 60px;
-    }
+        radial-gradient(ellipse 70% 50% at 15% 65%,rgba(0,100,255,.08) 0%,transparent 60%),
+        radial-gradient(ellipse 70% 50% at 85% 35%,rgba(0,60,200,.07) 0%,transparent 60%),
+        radial-gradient(ellipse 80% 60% at 50% 100%,rgba(0,20,100,.18) 0%,transparent 70%),
+        #06030a;}
+    .battle-grid{position:fixed;inset:0;z-index:0;
+      background-image:linear-gradient(rgba(255,80,0,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,80,0,.025) 1px,transparent 1px);
+      background-size:55px 55px;}
+    .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 80% 80% at 50% 50%,transparent 25%,rgba(0,0,0,.75) 100%);}
+    .scan{position:fixed;inset:0;z-index:1;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 3px);}
 
-    /* ── WRAPPER ─────────────────────────── */
-    #screen-battle {
-      position: relative; z-index: 1;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      height: 100vh;
-      width: 100vw;
-      gap: 0;
-    }
+    /* ── WRAPPER ── */
+    #screen-battle{position:relative;z-index:2;display:grid;grid-template-rows:auto 1fr auto;height:100vh;width:100vw;}
 
-    /* ══════════════════════════════════════
-       TOP BAR — HP bars
-    ══════════════════════════════════════ */
-    .battle-hud {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      gap: 16px;
-      padding: 14px 24px 10px;
-      background: rgba(8,8,15,0.85);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      backdrop-filter: blur(12px);
+    /* ══════════════ TOP HUD ══════════════ */
+    .battle-hud{
+      display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;
+      padding:12px 22px 10px;
+      background:rgba(6,3,10,.88);
+      border-bottom:1px solid rgba(255,100,0,.18);
+      backdrop-filter:blur(16px);
+      position:relative;
     }
+    .battle-hud::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,100,0,.4),rgba(255,200,0,.6),rgba(255,100,0,.4),transparent);}
 
-    /* Player side */
-    .hud-side { display: flex; flex-direction: column; gap: 5px; }
-    .hud-side.enemy { align-items: flex-end; }
+    .hud-side{display:flex;flex-direction:column;gap:5px;}
+    .hud-side.enemy{align-items:flex-end;}
 
-    .hud-name {
-      font-family: 'Orbitron', monospace;
-      font-size: 11px; font-weight: 700;
-      letter-spacing: 3px; text-transform: uppercase;
-    }
-    .hud-side:not(.enemy) .hud-name { color: var(--pl-col); }
-    .hud-side.enemy .hud-name { color: var(--en-col); }
+    .hud-name{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;}
+    .hud-side:not(.enemy) .hud-name{color:var(--pl-col);}
+    .hud-side.enemy .hud-name{color:var(--en-col);}
 
-    .hud-hp-row { display: flex; align-items: center; gap: 10px; }
-    .hud-side.enemy .hud-hp-row { flex-direction: row-reverse; }
+    .hud-hp-row{display:flex;align-items:center;gap:10px;}
+    .hud-side.enemy .hud-hp-row{flex-direction:row-reverse;}
 
-    .hud-hp-track {
-      width: 260px; height: 8px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 4px;
-      overflow: hidden;
+    .hud-hp-track{
+      width:240px;height:7px;background:rgba(255,255,255,.07);overflow:hidden;
+      clip-path:polygon(3px 0%,calc(100% - 3px) 0%,100% 3px,100% calc(100% - 3px),calc(100% - 3px) 100%,3px 100%,0% calc(100% - 3px),0% 3px);
     }
-    .hud-hp-fill {
-      height: 100%; border-radius: 4px;
-      transition: width 0.4s cubic-bezier(.4,0,.2,1);
-    }
-    .hud-side:not(.enemy) .hud-hp-fill {
-      background: linear-gradient(90deg, #00c87a, var(--pl-col));
-      box-shadow: 0 0 10px rgba(0,255,170,0.5);
-    }
-    .hud-side.enemy .hud-hp-fill {
-      background: linear-gradient(90deg, var(--en-col), #ff8844);
-      box-shadow: 0 0 10px rgba(255,44,85,0.5);
-    }
+    .hud-hp-fill{height:100%;transition:width .4s cubic-bezier(.4,0,.2,1);}
+    .hud-side:not(.enemy) .hud-hp-fill{background:linear-gradient(90deg,#0055cc,var(--pl-col));box-shadow:0 0 10px rgba(0,150,255,.5);}
+    .hud-side.enemy .hud-hp-fill{background:linear-gradient(90deg,var(--en-col),#6699ff);box-shadow:0 0 10px rgba(68,136,255,.5);}
 
-    .hud-hp-text {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 13px;
-      white-space: nowrap;
-    }
-    .hud-side:not(.enemy) .hud-hp-text { color: var(--pl-col); }
-    .hud-side.enemy .hud-hp-text { color: var(--en-col); }
+    .hud-hp-text{font-family:'Share Tech Mono',monospace;font-size:12px;white-space:nowrap;}
+    .hud-side:not(.enemy) .hud-hp-text{color:var(--pl-col);}
+    .hud-side.enemy .hud-hp-text{color:var(--en-col);}
 
-    /* Center VS */
-    .hud-center {
-      display: flex; flex-direction: column;
-      align-items: center; gap: 4px;
-    }
-    .hud-vs {
-      font-family: 'Orbitron', monospace;
-      font-size: 10px; font-weight: 900;
-      color: rgba(255,255,255,0.25);
-      letter-spacing: 4px;
-    }
-    .hud-round {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 10px; color: rgba(255,255,255,0.2);
-    }
+    .hud-center{display:flex;flex-direction:column;align-items:center;gap:3px;}
+    .hud-vs{font-family:'Uncial Antiqua',serif;font-size:14px;color:rgba(255,150,0,.4);letter-spacing:4px;}
+    .hud-round{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,.2);}
 
-    /* ══════════════════════════════════════
-       ARENA — fighters + puzzle (MIDDLE)
-    ══════════════════════════════════════ */
-    .battle-main {
-      display: grid;
-      grid-template-columns: 1fr 440px 1fr;
-      align-items: center;
-      padding: 0 20px;
-      gap: 0;
-      min-height: 0;
-    }
+    /* ══════════════ ARENA ══════════════ */
+    .battle-main{display:grid;grid-template-columns:1fr 420px 1fr;align-items:center;padding:0 16px;gap:0;min-height:0;}
 
-    /* Fighter columns */
-    .fighter-col {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
+    .fighter-col{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;}
 
-    .fighter-sprite-wrap {
-      position: relative;
-      width: 160px; height: 160px;
-      display: flex; align-items: center; justify-content: center;
-    }
+    .fighter-sprite-wrap{position:relative;width:155px;height:155px;display:flex;align-items:center;justify-content:center;}
 
-    /* Glowing ring behind sprite */
-    .fighter-ring {
-      position: absolute; inset: 0;
-      border-radius: 50%;
-      opacity: 0.6;
-    }
-    .fighter-col.player .fighter-ring {
-      background: radial-gradient(circle, rgba(0,255,170,0.2) 0%, transparent 70%);
-      box-shadow: 0 0 40px rgba(0,255,170,0.3), inset 0 0 30px rgba(0,255,170,0.1);
-      border: 1px solid rgba(0,255,170,0.2);
-      border-radius: 50%;
-    }
-    .fighter-col.enemy .fighter-ring {
-      background: radial-gradient(circle, rgba(255,44,85,0.2) 0%, transparent 70%);
-      box-shadow: 0 0 40px rgba(255,44,85,0.3), inset 0 0 30px rgba(255,44,85,0.1);
-      border: 1px solid rgba(255,44,85,0.2);
-      border-radius: 50%;
-    }
+    /* Forge glow ring */
+    .fighter-ring{position:absolute;inset:0;border-radius:50%;
+      clip-path:polygon(15% 0%,85% 0%,100% 15%,100% 85%,85% 100%,15% 100%,0% 85%,0% 15%);}
+    .fighter-col.player .fighter-ring{
+      background:radial-gradient(circle,rgba(0,150,255,.18) 0%,transparent 70%);
+      box-shadow:0 0 45px rgba(255,120,0,.35),inset 0 0 30px rgba(255,80,0,.12);
+      border:1px solid rgba(255,150,0,.25);border-radius:50%;}
+    .fighter-col.enemy .fighter-ring{
+      background:radial-gradient(circle,rgba(68,136,255,.18) 0%,transparent 70%);
+      box-shadow:0 0 45px rgba(0,100,255,.35),inset 0 0 30px rgba(255,44,85,.12);
+      border:1px solid rgba(0,100,255,.25);border-radius:50%;}
 
-    .fighter-sprite {
-      font-size: 100px;
-      line-height: 1;
-      z-index: 1;
-      filter: drop-shadow(0 0 20px rgba(255,255,255,0.2));
-      transition: transform 0.15s;
-    }
+    /* Animated ring pulse */
+    .fighter-col.player .fighter-ring{animation:pRingPulse 3s ease-in-out infinite;}
+    .fighter-col.enemy  .fighter-ring{animation:eRingPulse 3.3s ease-in-out infinite;}
+    @keyframes pRingPulse{0%,100%{box-shadow:0 0 35px rgba(255,120,0,.3)}50%{box-shadow:0 0 60px rgba(255,150,0,.55)}}
+    @keyframes eRingPulse{0%,100%{box-shadow:0 0 35px rgba(0,100,255,.3)}50%{box-shadow:0 0 60px rgba(255,44,85,.55)}}
 
-    .fighter-label {
-      font-family: 'Orbitron', monospace;
-      font-size: 9px; letter-spacing: 4px;
-      color: rgba(255,255,255,0.3);
-      text-transform: uppercase;
-    }
-    .fighter-col.player .fighter-label { color: rgba(0,255,170,0.5); }
-    .fighter-col.enemy .fighter-label  { color: rgba(255,44,85,0.5); }
+    .fighter-sprite{font-size:96px;line-height:1;z-index:1;filter:drop-shadow(0 0 18px rgba(255,255,255,.18));transition:transform .15s;}
+    .fighter-label{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:4px;text-transform:uppercase;}
+    .fighter-col.player .fighter-label{color:rgba(0,150,255,.5);}
+    .fighter-col.enemy  .fighter-label{color:rgba(68,136,255,.5);}
 
-    /* Damage float */
-    .dmg-float {
-      position: absolute;
-      top: -20px;
-      font-family: 'Orbitron', monospace;
-      font-size: 22px; font-weight: 900;
-      pointer-events: none;
-      opacity: 0;
-    }
-    .dmg-float.show {
-      animation: dmgPop 0.9s forwards;
-    }
-    @keyframes dmgPop {
-      0%   { opacity: 1; transform: translateY(0) scale(1.2); }
-      60%  { opacity: 1; transform: translateY(-50px) scale(1); }
-      100% { opacity: 0; transform: translateY(-70px) scale(0.8); }
-    }
+    .dmg-float{position:absolute;top:-20px;font-family:'Orbitron',monospace;font-size:22px;font-weight:900;pointer-events:none;opacity:0;}
+    .dmg-float.show{animation:dmgPop .9s forwards;}
+    @keyframes dmgPop{0%{opacity:1;transform:translateY(0) scale(1.2)}60%{opacity:1;transform:translateY(-50px) scale(1)}100%{opacity:0;transform:translateY(-72px) scale(.8)}}
 
-    /* Hurt / attack animations */
-    .fighter-sprite.hurt {
-      animation: hurtShake 0.35s ease;
-    }
-    @keyframes hurtShake {
-      0%,100% { transform: translateX(0) rotate(0deg); }
-      20%      { transform: translateX(-12px) rotate(-4deg); }
-      50%      { transform: translateX(10px) rotate(3deg) scale(0.92); filter: brightness(3) saturate(0); }
-      75%      { transform: translateX(-6px) rotate(-2deg); }
-    }
-    .fighter-sprite.attacking {
-      animation: attackLunge 0.35s ease;
-    }
-    @keyframes attackLunge {
-      0%,100% { transform: translateX(0) scale(1); }
-      40%     { transform: translateX(30px) scale(1.15); filter: brightness(1.5); }
-    }
-    .fighter-col.enemy .fighter-sprite.attacking {
-      animation: attackLungeEnemy 0.35s ease;
-    }
-    @keyframes attackLungeEnemy {
-      0%,100% { transform: translateX(0) scale(1); }
-      40%     { transform: translateX(-30px) scale(1.15); filter: brightness(1.5); }
-    }
+    .fighter-sprite.hurt{animation:hurtShake .35s ease;}
+    @keyframes hurtShake{0%,100%{transform:translateX(0) rotate(0deg)}20%{transform:translateX(-12px) rotate(-4deg)}50%{transform:translateX(10px) rotate(3deg) scale(.92);filter:brightness(3) saturate(0)}75%{transform:translateX(-6px) rotate(-2deg)}}
+    .fighter-sprite.attacking{animation:attackLunge .35s ease;}
+    @keyframes attackLunge{0%,100%{transform:translateX(0) scale(1)}40%{transform:translateX(32px) scale(1.15);filter:brightness(1.5)}}
+    .fighter-col.enemy .fighter-sprite.attacking{animation:attackLungeE .35s ease;}
+    @keyframes attackLungeE{0%,100%{transform:translateX(0) scale(1)}40%{transform:translateX(-32px) scale(1.15);filter:brightness(1.5)}}
 
-    /* ── Puzzle center panel ─────────── */
-    .puzzle-panel {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
+    /* ── Puzzle panel ── */
+    .puzzle-panel{display:flex;flex-direction:column;align-items:center;gap:9px;}
 
-    /* Battle log above puzzle */
-    .battle-log {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 14px; font-weight: 700;
-      letter-spacing: 2px;
-      color: var(--gold);
-      text-transform: uppercase;
-      text-align: center;
-      min-height: 22px;
-      text-shadow: 0 0 12px rgba(255,214,10,0.6);
-      opacity: 0;
-      transition: opacity 0.2s;
+    .battle-log{
+      font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;
+      color:var(--gold);text-transform:uppercase;text-align:center;min-height:22px;
+      text-shadow:0 0 14px rgba(255,214,10,.7);opacity:0;transition:opacity .2s;
     }
-    .battle-log.show { opacity: 1; }
+    .battle-log.show{opacity:1;}
 
-    /* Puzzle image — LARGE */
-    .puzzle-img-frame {
-      position: relative;
-      width: 380px; height: 220px;
-      border-radius: 16px;
-      border: 2px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.5);
-      overflow: hidden;
-      box-shadow:
-        0 0 40px rgba(123,47,255,0.25),
-        0 0 0 1px rgba(123,47,255,0.15),
-        inset 0 1px 0 rgba(255,255,255,0.08);
+    /* Puzzle image frame — forge border */
+    .puzzle-img-frame{
+      position:relative;width:370px;height:215px;
+      background:rgba(0,0,0,.6);overflow:hidden;
+      clip-path:polygon(10px 0%,calc(100% - 10px) 0%,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0% calc(100% - 10px),0% 10px);
+      border:1px solid rgba(255,100,0,.25);
+      box-shadow:0 0 40px rgba(150,30,0,.3),0 0 0 1px rgba(255,100,0,.1),inset 0 0 30px rgba(50,5,0,.3);
     }
-    .puzzle-img-frame::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(123,47,255,0.1) 0%, transparent 50%, rgba(0,212,255,0.05) 100%);
-      z-index: 1; pointer-events: none;
-    }
+    .puzzle-img-frame::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(180,50,0,.1) 0%,transparent 50%,rgba(100,20,0,.08) 100%);z-index:1;pointer-events:none;}
+    /* Animated top accent */
+    .puzzle-img-frame::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#ff8800,#ffcc00,#ff8800,transparent);animation:pzGlow 2s ease-in-out infinite;}
+    @keyframes pzGlow{0%,100%{opacity:.5}50%{opacity:1}}
 
-    #puzzle-img {
-      width: 100%; height: 100%;
-      object-fit: contain;
-      display: none;
-    }
-    #puzzle-loading {
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 13px; letter-spacing: 3px;
-      color: rgba(255,255,255,0.3);
-      animation: loadPulse 1.4s ease-in-out infinite;
-    }
-    @keyframes loadPulse {
-      0%,100% { opacity: 0.3; } 50% { opacity: 0.8; }
-    }
+    /* Corner accent ticks */
+    .pz-corner{position:absolute;width:14px;height:14px;border-color:rgba(255,150,50,.4);border-style:solid;z-index:2;}
+    .pz-corner.tl{top:4px;left:4px;border-width:2px 0 0 2px;}
+    .pz-corner.tr{top:4px;right:4px;border-width:2px 2px 0 0;}
+    .pz-corner.bl{bottom:4px;left:4px;border-width:0 0 2px 2px;}
+    .pz-corner.br{bottom:4px;right:4px;border-width:0 2px 2px 0;}
 
-    .puzzle-hint {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 9px; letter-spacing: 2px;
-      color: rgba(255,255,255,0.2);
-      text-align: center;
-    }
+    #puzzle-img{width:100%;height:100%;object-fit:contain;display:none;}
+    #puzzle-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:3px;color:rgba(255,200,100,.3);animation:ldPulse 1.4s ease-in-out infinite;z-index:1;}
+    @keyframes ldPulse{0%,100%{opacity:.3}50%{opacity:.8}}
+    .puzzle-hint{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:3px;color:rgba(255,200,100,.25);text-align:center;}
+    #api-error{font-size:10px;color:#4488ff;text-align:center;display:none;font-family:'Share Tech Mono',monospace;}
 
-    #api-error {
-      font-size: 11px; color: #ff4455;
-      text-align: center; display: none;
-      font-family: 'Share Tech Mono', monospace;
+    /* ══════════════ BOTTOM ══════════════ */
+    .battle-bottom{
+      background:rgba(6,3,10,.92);
+      border-top:1px solid rgba(255,100,0,.18);
+      backdrop-filter:blur(16px);
+      padding:9px 18px 12px;
+      display:flex;flex-direction:column;gap:9px;
+      position:relative;
     }
+    .battle-bottom::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,100,0,.4),rgba(255,200,0,.5),rgba(255,100,0,.4),transparent);}
 
-    /* ══════════════════════════════════════
-       BOTTOM — timer + digits + actions
-    ══════════════════════════════════════ */
-    .battle-bottom {
-      background: rgba(8,8,15,0.9);
-      border-top: 1px solid rgba(255,255,255,0.06);
-      backdrop-filter: blur(12px);
-      padding: 10px 20px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+    /* Timer row */
+    .timer-row{display:flex;align-items:center;justify-content:space-between;}
 
-    /* Timer row: badge LEFT | circle CENTER | spacer RIGHT */
-    .timer-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+    .action-badge{font-family:'Orbitron',monospace;font-size:9px;font-weight:700;letter-spacing:2px;padding:5px 14px;text-transform:uppercase;white-space:nowrap;
+      clip-path:polygon(4px 0%,calc(100% - 4px) 0%,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0% calc(100% - 4px),0% 4px);}
+    .action-badge.attack{background:rgba(0,100,255,.15);color:#4488ff;border:1px solid rgba(0,100,255,.3);}
+    .action-badge.defend{background:rgba(0,150,255,.12);color:#00aaff;border:1px solid rgba(0,150,255,.3);}
 
-    .action-badge {
-      font-family: 'Orbitron', monospace;
-      font-size: 9px; font-weight: 700;
-      letter-spacing: 2px;
-      padding: 5px 14px; border-radius: 20px;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-    .action-badge.attack {
-      background: rgba(255,44,85,0.15);
-      color: #ff4455;
-      border: 1px solid rgba(255,44,85,0.3);
-    }
-    .action-badge.defend {
-      background: rgba(0,212,255,0.12);
-      color: #00d4ff;
-      border: 1px solid rgba(0,212,255,0.3);
-    }
+    /* Circular timer */
+    .timer-circle-wrap{position:relative;width:62px;height:62px;}
+    .timer-svg{width:62px;height:62px;transform:rotate(-90deg);}
+    .timer-svg-track{fill:none;stroke:rgba(255,255,255,.07);stroke-width:5;}
+    .timer-svg-fill{fill:none;stroke:#ffd60a;stroke-width:5;stroke-linecap:round;stroke-dasharray:163;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear,stroke .3s;filter:drop-shadow(0 0 5px rgba(255,214,10,.8));}
+    .timer-svg-fill.danger{stroke:#ff2244;filter:drop-shadow(0 0 8px rgba(255,34,68,1));animation:timerPanic .3s infinite alternate;}
+    @keyframes timerPanic{from{opacity:1}to{opacity:.5}}
+    .timer-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:19px;font-weight:900;color:var(--gold);}
+    .timer-num.warning{color:#4488ff;}
+    .timer-spacer{width:90px;}
 
-    /* Circular countdown timer */
-    .timer-circle-wrap {
-      position: relative;
-      width: 64px; height: 64px;
+    /* Digit grid */
+    .digits-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;}
+    .digit-btn{
+      height:50px;background:rgba(255,255,255,.04);border:1px solid rgba(255,100,0,.18);
+      color:#ffcc88;font-family:'Orbitron',monospace;font-size:17px;font-weight:700;
+      cursor:pointer;transition:all .12s;position:relative;overflow:hidden;
+      clip-path:polygon(4px 0%,calc(100% - 4px) 0%,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0% calc(100% - 4px),0% 4px);
     }
-    .timer-svg {
-      width: 64px; height: 64px;
-      transform: rotate(-90deg);
-    }
-    .timer-svg-track {
-      fill: none;
-      stroke: rgba(255,255,255,0.07);
-      stroke-width: 5;
-    }
-    .timer-svg-fill {
-      fill: none;
-      stroke: #ffd60a;
-      stroke-width: 5;
-      stroke-linecap: round;
-      stroke-dasharray: 163;
-      stroke-dashoffset: 0;
-      transition: stroke-dashoffset 1s linear, stroke 0.3s;
-      filter: drop-shadow(0 0 5px rgba(255,214,10,0.8));
-    }
-    .timer-svg-fill.danger {
-      stroke: #ff2244;
-      filter: drop-shadow(0 0 8px rgba(255,34,68,1));
-      animation: timerPanic 0.3s infinite alternate;
-    }
-    @keyframes timerPanic {
-      from { opacity: 1; } to { opacity: 0.5; }
-    }
-    .timer-num {
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Orbitron', monospace;
-      font-size: 20px; font-weight: 900;
-      color: var(--gold);
-    }
-    .timer-num.warning { color: #ff4455; }
-    .timer-spacer { width: 90px; }
+    .digit-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,150,0,.06) 0%,transparent 50%);opacity:0;transition:opacity .15s;}
+    .digit-btn:hover:not(:disabled){background:rgba(255,120,0,.12);border-color:rgba(255,150,0,.4);transform:translateY(-3px);box-shadow:0 6px 20px rgba(150,40,0,.3);}
+    .digit-btn:hover:not(:disabled)::before{opacity:1;}
+    .digit-btn:active:not(:disabled){transform:translateY(0) scale(.96);}
+    .digit-btn:disabled{opacity:.3;cursor:default;}
+    .digit-btn.correct{background:rgba(0,255,100,.18)!important;border-color:#00ff64!important;color:#00ff64!important;box-shadow:0 0 20px rgba(0,255,100,.35)!important;transform:scale(1.08);}
+    .digit-btn.wrong{background:rgba(68,136,255,.18)!important;border-color:#4488ff!important;color:#4488ff!important;box-shadow:0 0 20px rgba(0,100,255,.35)!important;animation:wrongShake .3s ease;}
+    @keyframes wrongShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 
-    /* Action buttons — CENTERED */
-    .action-row {
-      display: flex;
-      justify-content: center;
-      gap: 14px;
+    /* Action buttons */
+    .action-row{display:flex;justify-content:center;gap:14px;}
+    .action-col{display:flex;flex-direction:column;align-items:center;gap:3px;width:200px;}
+    .act-btn{
+      height:44px;border:none;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+      transition:all .15s;position:relative;overflow:hidden;
+      clip-path:polygon(6px 0%,calc(100% - 6px) 0%,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0% calc(100% - 6px),0% 6px);
+      width:100%;
     }
-    .action-col {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      width: 200px;
-    }
+    .act-btn::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;}
+    .act-btn.atk{background:rgba(0,100,255,.1);color:#4488ff;border:1px solid rgba(0,100,255,.3);}
+    .act-btn.atk::after{background:linear-gradient(90deg,transparent,#4488ff,transparent);}
+    .act-btn.atk:hover{background:rgba(0,100,255,.2);border-color:#4488ff;box-shadow:0 0 20px rgba(0,100,255,.25);}
+    .act-btn.atk.active{background:rgba(0,100,255,.22);border-color:#4488ff;box-shadow:0 0 25px rgba(0,100,255,.35);}
+    .act-btn.def{background:rgba(0,150,255,.08);color:#00aaff;border:1px solid rgba(0,150,255,.25);}
+    .act-btn.def::after{background:linear-gradient(90deg,transparent,#00aaff,transparent);}
+    .act-btn.def:hover{background:rgba(0,150,255,.18);border-color:#00aaff;box-shadow:0 0 20px rgba(0,150,255,.2);}
+    .act-btn.def.active{background:rgba(0,150,255,.2);border-color:#00aaff;box-shadow:0 0 25px rgba(0,150,255,.3);}
 
-    /* Digit buttons */
-    .digits-grid {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap: 6px;
+    /* ── Power-up bar ── */
+    .powerup-bar{display:flex;justify-content:center;gap:10px;margin-top:4px;}
+    .pu-btn{
+      display:flex;flex-direction:column;align-items:center;gap:2px;
+      padding:6px 12px;border-radius:10px;cursor:pointer;
+      border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.04);
+      font-family:'Orbitron',monospace;font-size:9px;letter-spacing:1px;
+      color:rgba(255,255,255,0.6);transition:all 0.15s;position:relative;
+      min-width:68px;
     }
+    .pu-btn .pu-icon{font-size:20px;line-height:1;}
+    .pu-btn .pu-name{font-size:7px;letter-spacing:1px;color:rgba(255,255,255,0.4);}
+    .pu-btn .pu-count{
+      position:absolute;top:-6px;right:-6px;
+      background:#ffd60a;color:#000;
+      border-radius:50%;width:18px;height:18px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:10px;font-weight:900;font-family:'Orbitron',monospace;
+    }
+    .pu-btn:hover:not(:disabled){background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.3);transform:translateY(-2px);}
+    .pu-btn:disabled{opacity:0.25;cursor:not-allowed;}
+    .pu-btn.pu-shield{border-color:rgba(0,212,255,0.3);color:#00d4ff;}
+    .pu-btn.pu-shield:hover:not(:disabled){background:rgba(0,212,255,0.12);box-shadow:0 0 16px rgba(0,212,255,0.3);}
+    .pu-btn.pu-rage{border-color:rgba(255,80,0,0.35);color:#ff6020;}
+    .pu-btn.pu-rage:hover:not(:disabled){background:rgba(255,80,0,0.12);box-shadow:0 0 16px rgba(255,80,0,0.3);}
+    .pu-btn.pu-heal{border-color:rgba(0,255,100,0.3);color:#00ff64;}
+    .pu-btn.pu-heal:hover:not(:disabled){background:rgba(0,255,100,0.1);box-shadow:0 0 16px rgba(0,255,100,0.25);}
+    .pu-btn.pu-freeze{border-color:rgba(100,200,255,0.35);color:#64c8ff;}
+    .pu-btn.pu-freeze:hover:not(:disabled){background:rgba(100,200,255,0.1);box-shadow:0 0 16px rgba(100,200,255,0.3);}
+    .pu-btn.active-glow{animation:puGlow 0.6s ease infinite alternate;}
+    @keyframes puGlow{from{box-shadow:0 0 8px currentColor;}to{box-shadow:0 0 22px currentColor,0 0 40px currentColor;}}
+    .act-hint{font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:1px;color:rgba(255,255,255,.22);text-align:center;}
 
-    .digit-btn {
-      height: 52px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px;
-      color: #fff;
-      font-family: 'Orbitron', monospace;
-      font-size: 18px; font-weight: 700;
-      cursor: pointer;
-      transition: all 0.12s;
-      position: relative;
-      overflow: hidden;
-    }
-    .digit-btn::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%);
-      opacity: 0; transition: opacity 0.15s;
-    }
-    .digit-btn:hover:not(:disabled) {
-      background: rgba(255,255,255,0.1);
-      border-color: rgba(255,255,255,0.25);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-    }
-    .digit-btn:hover:not(:disabled)::before { opacity: 1; }
-    .digit-btn:active:not(:disabled) { transform: translateY(0) scale(0.96); }
-    .digit-btn:disabled { opacity: 0.35; cursor: default; }
-    .digit-btn.correct {
-      background: rgba(0,255,100,0.2) !important;
-      border-color: #00ff64 !important;
-      color: #00ff64 !important;
-      box-shadow: 0 0 20px rgba(0,255,100,0.4) !important;
-      transform: scale(1.08);
-    }
-    .digit-btn.wrong {
-      background: rgba(255,44,85,0.2) !important;
-      border-color: #ff4455 !important;
-      color: #ff4455 !important;
-      box-shadow: 0 0 20px rgba(255,44,85,0.4) !important;
-      animation: wrongShake 0.3s ease;
-    }
-    @keyframes wrongShake {
-      0%,100% { transform: translateX(0); }
-      25%      { transform: translateX(-4px); }
-      75%      { transform: translateX(4px); }
-    }
-
-    .act-btn {
-      height: 44px;
-      border-radius: 10px;
-      border: none;
-      font-family: 'Orbitron', monospace;
-      font-size: 11px; font-weight: 700;
-      letter-spacing: 2px; text-transform: uppercase;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      transition: all 0.15s;
-      position: relative; overflow: hidden;
-    }
-    .act-btn::after {
-      content: '';
-      position: absolute; bottom: 0; left: 0; right: 0;
-      height: 2px;
-    }
-
-    .act-btn.atk {
-      background: rgba(255,44,85,0.12);
-      color: #ff4455;
-      border: 1px solid rgba(255,44,85,0.35);
-    }
-    .act-btn.atk::after { background: linear-gradient(90deg, transparent, #ff4455, transparent); }
-    .act-btn.atk:hover  { background: rgba(255,44,85,0.22); border-color: #ff4455; box-shadow: 0 0 20px rgba(255,44,85,0.25); }
-    .act-btn.atk.active { background: rgba(255,44,85,0.25); border-color: #ff4455; box-shadow: 0 0 25px rgba(255,44,85,0.35); }
-
-    .act-btn.def {
-      background: rgba(0,212,255,0.08);
-      color: #00d4ff;
-      border: 1px solid rgba(0,212,255,0.25);
-    }
-    .act-btn.def::after { background: linear-gradient(90deg, transparent, #00d4ff, transparent); }
-    .act-btn.def:hover  { background: rgba(0,212,255,0.18); border-color: #00d4ff; box-shadow: 0 0 20px rgba(0,212,255,0.2); }
-    .act-btn.def.active { background: rgba(0,212,255,0.2);  border-color: #00d4ff; box-shadow: 0 0 25px rgba(0,212,255,0.3); }
-
-    .act-hint {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 10px; letter-spacing: 1px;
-      color: rgba(255,255,255,0.25);
-      text-align: center;
-      margin-top: 2px;
-    }
-
-    /* Toast */
-    #toast {
-      position: fixed;
-      top: 70px; left: 50%; transform: translateX(-50%);
-      z-index: 9999;
-      background: rgba(8,8,15,0.92);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 12px;
-      padding: 10px 22px;
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 14px; font-weight: 600; letter-spacing: 1px;
-      color: #fff;
-      backdrop-filter: blur(12px);
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.3s, transform 0.3s;
-    }
-    #toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
+    #toast{position:fixed;top:68px;left:50%;transform:translateX(-50%);z-index:9999;
+      background:rgba(6,3,10,.94);border:1px solid rgba(255,100,0,.35);padding:9px 22px;
+      font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;letter-spacing:1px;color:#ffcc88;
+      backdrop-filter:blur(12px);opacity:0;pointer-events:none;transition:opacity .3s;
+      clip-path:polygon(6px 0%,calc(100% - 6px) 0%,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0% calc(100% - 6px),0% 6px);}
+    #toast.show{opacity:1;}
   </style>
 </head>
 <body>
 
+<div class="cursor" id="cursor"><div class="cursor-outer"></div><div class="cursor-inner"></div></div>
+<canvas id="bg-canvas"></canvas>
 <div class="battle-bg"></div>
-<div class="battle-bg-grid"></div>
+<div class="battle-grid"></div>
+<div class="vignette"></div>
+<div class="scan"></div>
 <div id="toast"></div>
 
 <div id="screen-battle">
 
-  <!-- ── TOP HUD ── -->
+  <!-- TOP HUD -->
   <div class="battle-hud">
-    <!-- Player -->
     <div class="hud-side">
       <div class="hud-name">⚔ <span id="battle-player-name">PLAYER</span></div>
       <div class="hud-hp-row">
-        <div class="hud-hp-track">
-          <div class="hud-hp-fill" id="player-hp-bar" style="width:100%"></div>
-        </div>
+        <div class="hud-hp-track"><div class="hud-hp-fill" id="player-hp-bar" style="width:100%"></div></div>
         <div class="hud-hp-text"><span id="player-hp-num">25</span> / 25 HP</div>
       </div>
     </div>
-
-    <!-- Center -->
     <div class="hud-center">
-      <div class="hud-vs">VS</div>
+      <div class="hud-vs">⚔ VS ⚔</div>
+      <div class="hud-round" id="hud-round">ROUND 1</div>
     </div>
-
-    <!-- Enemy -->
     <div class="hud-side enemy">
       <div class="hud-name"><span id="battle-enemy-name">DARK MAGE</span> 👹</div>
       <div class="hud-hp-row">
-        <div class="hud-hp-track">
-          <div class="hud-hp-fill" id="enemy-hp-bar" style="width:100%"></div>
-        </div>
+        <div class="hud-hp-track"><div class="hud-hp-fill" id="enemy-hp-bar" style="width:100%"></div></div>
         <div class="hud-hp-text"><span id="enemy-hp-num">25</span> / 25 HP</div>
       </div>
     </div>
   </div>
 
-  <!-- ── ARENA + PUZZLE ── -->
+  <!-- ARENA -->
   <div class="battle-main">
-
-    <!-- Player fighter -->
     <div class="fighter-col player">
       <div class="fighter-sprite-wrap">
         <div class="fighter-ring"></div>
         <div class="fighter-sprite" id="player-sprite">🧙</div>
-        <div class="dmg-float" id="player-dmg" style="color:#ff4455">-5</div>
+        <div class="dmg-float" id="player-dmg" style="color:#4488ff">-5</div>
       </div>
       <div class="fighter-label">YOU</div>
     </div>
 
-    <!-- Puzzle panel (center) -->
     <div class="puzzle-panel">
       <div class="battle-log" id="battle-log">⚔ BATTLE START!</div>
-
       <div class="puzzle-img-frame">
-        <div id="puzzle-loading">LOADING PUZZLE...</div>
+        <div class="pz-corner tl"></div><div class="pz-corner tr"></div>
+        <div class="pz-corner bl"></div><div class="pz-corner br"></div>
+        <div id="puzzle-loading">⚔ LOADING PUZZLE...</div>
         <img id="puzzle-img" alt="Heart puzzle">
       </div>
-
       <div class="puzzle-hint">❤ FIND THE MISSING NUMBER IN THE HEART PATTERN</div>
       <div id="api-error"></div>
     </div>
 
-    <!-- Enemy fighter -->
     <div class="fighter-col enemy">
       <div class="fighter-sprite-wrap">
         <div class="fighter-ring"></div>
         <div class="fighter-sprite" id="enemy-sprite">👹</div>
-        <div class="dmg-float" id="enemy-dmg" style="color:#ff4455">-5</div>
+        <div class="dmg-float" id="enemy-dmg" style="color:#4488ff">-5</div>
       </div>
       <div class="fighter-label">ENEMY</div>
     </div>
-
   </div>
 
-  <!-- ── BOTTOM CONTROLS ── -->
+  <!-- BOTTOM -->
   <div class="battle-bottom">
-
-    <!-- Timer row: badge | circular timer | spacer -->
     <div class="timer-row">
       <div class="action-badge attack" id="action-badge">⚔ ATTACK</div>
-
       <div class="timer-circle-wrap">
         <svg class="timer-svg" viewBox="0 0 64 64">
           <circle class="timer-svg-track" cx="32" cy="32" r="26"/>
@@ -611,33 +337,47 @@
         </svg>
         <div class="timer-num" id="timer-num">20</div>
       </div>
-
       <div class="timer-spacer"></div>
     </div>
-
-    <!-- Digit grid -->
     <div class="digits-grid" id="puzzle-options"></div>
 
-    <!-- Action buttons — CENTERED -->
+    <!-- ── Power-up bar ── -->
+    <div class="powerup-bar" id="powerup-bar">
+      <button class="pu-btn pu-shield" id="pu-shield" onclick="EventBus.emit('battle:usePowerup',{type:'shield'})" disabled>
+        <span class="pu-icon">🛡</span>
+        <span class="pu-name">SHIELD</span>
+        <span class="pu-count" id="pu-count-shield">0</span>
+      </button>
+      <button class="pu-btn pu-rage" id="pu-rage" onclick="EventBus.emit('battle:usePowerup',{type:'rage'})" disabled>
+        <span class="pu-icon">🔥</span>
+        <span class="pu-name">FURY</span>
+        <span class="pu-count" id="pu-count-rage">0</span>
+      </button>
+      <button class="pu-btn pu-heal" id="pu-heal" onclick="EventBus.emit('battle:usePowerup',{type:'heal'})" disabled>
+        <span class="pu-icon">💚</span>
+        <span class="pu-name">HEAL</span>
+        <span class="pu-count" id="pu-count-heal">0</span>
+      </button>
+      <button class="pu-btn pu-freeze" id="pu-freeze" onclick="EventBus.emit('battle:usePowerup',{type:'freeze'})" disabled>
+        <span class="pu-icon">❄️</span>
+        <span class="pu-name">FREEZE</span>
+        <span class="pu-count" id="pu-count-freeze">0</span>
+      </button>
+    </div>
+
     <div class="action-row">
       <div class="action-col">
-        <button class="act-btn atk active" id="btn-attack"
-          onclick="EventBus.emit('battle:doSetAction',{action:'attack'})">
-          ⚔ &nbsp;ATTACK
-        </button>
+        <button class="act-btn atk active" id="btn-attack" onclick="EventBus.emit('battle:doSetAction',{action:'attack'})">⚔ &nbsp;ATTACK</button>
         <div class="act-hint">Solve → deal damage</div>
       </div>
       <div class="action-col">
-        <button class="act-btn def" id="btn-defend"
-          onclick="EventBus.emit('battle:doSetAction',{action:'defend'})">
-          🛡 &nbsp;DEFEND
-        </button>
+        <button class="act-btn def" id="btn-defend" onclick="EventBus.emit('battle:doSetAction',{action:'defend'})">🛡 &nbsp;DEFEND</button>
         <div class="act-hint">Solve → block damage</div>
       </div>
     </div>
-
   </div>
-</div><!-- #screen-battle -->
+
+</div>
 
 <script src="../shared/eventbus.js"></script>
 <script src="../shared/state.js"></script>
@@ -649,235 +389,208 @@
 <script src="../shared/ui.js"></script>
 <script src="../shared/main.js"></script>
 <script>
-  // ── Auth guard ─────────────────────────────────────
-  if (!State.isLoggedIn()) window.location.href = 'auth.html';
+  if(!State.isLoggedIn()) window.location.href='auth.html';
 
-  // ── Difficulty ─────────────────────────────────────
-  var difficulty = sessionStorage.getItem('pw_difficulty') || 'normal';
+  /* ── cursor ── */
+  var cur=document.getElementById('cursor');
+  document.addEventListener('mousemove',function(e){cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';});
+  document.addEventListener('mousedown',function(){cur.classList.add('cl');});
+  document.addEventListener('mouseup',function(){cur.classList.remove('cl');});
 
-  // ── Init BattleEngine ──────────────────────────────
+  /* ── fire bg ── */
+  (function(){var C=document.getElementById('bg-canvas'),ctx=C.getContext('2d'),W,H,pts=[],t=0;function resize(){W=C.width=innerWidth;H=C.height=innerHeight;}addEventListener('resize',resize);resize();for(var i=0;i<90;i++)pts.push({x:Math.random()*W,y:H+Math.random()*120,r:Math.random()*2+.3,vx:(Math.random()-.5)*.3,vy:-(Math.random()*1.1+.25),life:Math.random(),max:Math.random()*.6+.3,hue:Math.random()*20+5});function draw(){ctx.clearRect(0,0,W,H);t++;pts.forEach(function(p){p.life+=.012;if(p.life>p.max){p.y=H+15;p.x=Math.random()*W;p.life=0;p.max=Math.random()*.6+.3;}var pg=p.life/p.max,a=pg<.2?pg/.2:pg>.7?(1-pg)/.3:1;a*=.55;ctx.beginPath();ctx.arc(p.x,p.y,p.r*(1-pg*.5),0,Math.PI*2);ctx.fillStyle='hsla('+(p.hue+pg*12)+','+(82-pg*22)+'%,'+(62-pg*32)+'%,'+a+')';ctx.fill();p.x+=p.vx+Math.sin(t*.02+p.y*.01)*.25;p.y+=p.vy;});requestAnimationFrame(draw);}draw();})();
+
+  var difficulty=sessionStorage.getItem('pw_difficulty')||'normal';
   BattleEngine.init();
 
-  // ── UI overrides for new layout ────────────────────
-  (function() {
-
-    // Digit buttons (override ui.js renderDigitButtons)
-    function renderDigits(disabled) {
-      var wrap = document.getElementById('puzzle-options');
-      if (!wrap) return;
-      wrap.innerHTML = [0,1,2,3,4,5,6,7,8,9].map(function(n) {
-        return '<button class="digit-btn" id="opt-'+n+'"'
-          + (disabled ? ' disabled' : '')
-          + ' onclick="EventBus.emit(\'battle:doAnswer\',{digit:'+n+'})">'
-          + n + '</button>';
+  /* ── UI OVERRIDES ── */
+  (function(){
+    function renderDigits(disabled){
+      var wrap=document.getElementById('puzzle-options'); if(!wrap)return;
+      wrap.innerHTML=[0,1,2,3,4,5,6,7,8,9].map(function(n){
+        return '<button class="digit-btn" id="opt-'+n+'"'+(disabled?' disabled':'')+' onclick="EventBus.emit(\'battle:doAnswer\',{digit:'+n+'})">'+n+'</button>';
       }).join('');
     }
 
-    // Puzzle loading state
-    EventBus.on('battle:puzzleLoading', function() {
-      var img  = document.getElementById('puzzle-img');
-      var load = document.getElementById('puzzle-loading');
-      var err  = document.getElementById('api-error');
-      if (img)  { img.style.display = 'none'; }
-      if (load) { load.style.display = 'flex'; load.textContent = 'LOADING PUZZLE...'; }
-      if (err)  { err.style.display = 'none'; }
+    EventBus.on('battle:puzzleLoading',function(){
+      var img=document.getElementById('puzzle-img'),load=document.getElementById('puzzle-loading'),err=document.getElementById('api-error');
+      if(img)img.style.display='none'; if(load){load.style.display='flex';load.textContent='⚔ LOADING PUZZLE...';} if(err)err.style.display='none';
       renderDigits(true);
     });
-
-    // Puzzle loaded
-    EventBus.on('battle:puzzleLoaded', function(data) {
-      var img  = document.getElementById('puzzle-img');
-      var load = document.getElementById('puzzle-loading');
-      if (!img) return;
-      img.onload  = function() { if (load) load.style.display = 'none'; img.style.display = 'block'; };
-      img.onerror = function() { if (load) load.textContent = '⚠ IMAGE FAILED'; };
-      img.src = data.puzzle.imageUrl;
+    EventBus.on('battle:puzzleLoaded',function(data){
+      var img=document.getElementById('puzzle-img'),load=document.getElementById('puzzle-loading');
+      if(!img)return;
+      img.onload=function(){if(load)load.style.display='none';img.style.display='block';};
+      img.onerror=function(){if(load)load.textContent='⚠ IMAGE FAILED';};
+      img.src=data.puzzle.imageUrl;
       renderDigits(false);
     });
-
-    // Puzzle error
-    EventBus.on('battle:puzzleError', function(data) {
-      var load = document.getElementById('puzzle-loading');
-      var err  = document.getElementById('api-error');
-      if (load) load.style.display = 'none';
-      if (err)  { err.style.display = 'block'; err.textContent = '⚠ ' + data.message + ' — retrying...'; }
+    EventBus.on('battle:puzzleError',function(data){
+      var load=document.getElementById('puzzle-loading'),err=document.getElementById('api-error');
+      if(load)load.style.display='none'; if(err){err.style.display='block';err.textContent='⚠ '+data.message+' — retrying...';}
     });
 
-    // Timer — circular SVG
-    var timerMax = 20;
-    EventBus.on('battle:timerStart', function(d) {
-      timerMax = d.seconds;
-      var circle = document.getElementById('timer-bar');
-      var num    = document.getElementById('timer-num');
-      if (!circle || !num) return;
-      // Reset: full circle, no transition
-      circle.style.transition = 'none';
-      circle.style.strokeDashoffset = '0';
-      circle.classList.remove('danger');
-      num.textContent = d.seconds;
-      num.classList.remove('warning');
-      // Animate to empty over the full time
-      setTimeout(function() {
-        circle.style.transition = 'stroke-dashoffset ' + d.seconds + 's linear, stroke 0.3s';
-        circle.style.strokeDashoffset = '163';
-      }, 50);
+    var timerMax=20;
+    EventBus.on('battle:timerStart',function(d){
+      timerMax=d.seconds;
+      var circle=document.getElementById('timer-bar'),num=document.getElementById('timer-num');
+      if(!circle||!num)return;
+      circle.style.transition='none'; circle.style.strokeDashoffset='0'; circle.classList.remove('danger');
+      num.textContent=d.seconds; num.classList.remove('warning');
+      setTimeout(function(){circle.style.transition='stroke-dashoffset '+d.seconds+'s linear,stroke .3s';circle.style.strokeDashoffset='163';},50);
+    });
+    EventBus.on('battle:timerTick',function(d){
+      var num=document.getElementById('timer-num'),circle=document.getElementById('timer-bar');
+      if(num){num.textContent=d.seconds;if(d.seconds<=5){num.classList.add('warning');if(circle)circle.classList.add('danger');}}
     });
 
-    EventBus.on('battle:timerTick', function(d) {
-      var num    = document.getElementById('timer-num');
-      var circle = document.getElementById('timer-bar');
-      if (num) {
-        num.textContent = d.seconds;
-        if (d.seconds <= 5) {
-          num.classList.add('warning');
-          if (circle) circle.classList.add('danger');
-        }
-      }
+    EventBus.on('battle:answered',function(d){
+      document.querySelectorAll('.digit-btn').forEach(function(b){b.disabled=true;});
+      var sol=document.getElementById('opt-'+d.solution); if(sol)sol.classList.add('correct');
+      if(!d.correct){var w=document.getElementById('opt-'+d.digit);if(w)w.classList.add('wrong');}
+    });
+    EventBus.on('battle:timeout',function(d){
+      document.querySelectorAll('.digit-btn').forEach(function(b){b.disabled=true;});
+      if(d.solution!=null){var s=document.getElementById('opt-'+d.solution);if(s)s.classList.add('correct');}
+      var log=document.getElementById('battle-log'); if(log){log.textContent="⏱ TIME'S UP!";log.classList.add('show');}
     });
 
-    // Answer highlight
-    EventBus.on('battle:answered', function(d) {
-      document.querySelectorAll('.digit-btn').forEach(function(b) { b.disabled = true; });
-      var sol = document.getElementById('opt-' + d.solution);
-      if (sol) sol.classList.add('correct');
-      if (!d.correct) {
-        var wrong = document.getElementById('opt-' + d.digit);
-        if (wrong) wrong.classList.add('wrong');
-      }
-    });
-
-    EventBus.on('battle:timeout', function(d) {
-      document.querySelectorAll('.digit-btn').forEach(function(b) { b.disabled = true; });
-      if (d.solution != null) {
-        var sol = document.getElementById('opt-' + d.solution);
-        if (sol) sol.classList.add('correct');
-      }
-      var log = document.getElementById('battle-log');
-      if (log) { log.textContent = "⏱ TIME'S UP!"; log.classList.add('show'); }
-    });
-
-    // Battle log
     var logTimer;
-    EventBus.on('battle:log', function(d) {
-      var el = document.getElementById('battle-log');
-      if (!el) return;
-      el.textContent = d.message;
-      el.classList.add('show');
-      clearTimeout(logTimer);
-      logTimer = setTimeout(function() { el.classList.remove('show'); }, 1800);
+    EventBus.on('battle:log',function(d){
+      var el=document.getElementById('battle-log'); if(!el)return;
+      el.textContent=d.message; el.classList.add('show');
+      clearTimeout(logTimer); logTimer=setTimeout(function(){el.classList.remove('show');},1800);
     });
 
-    // Action badge + button highlights
-    EventBus.on('battle:actionChange', function(d) {
-      var badge = document.getElementById('action-badge');
-      var atk   = document.getElementById('btn-attack');
-      var def   = document.getElementById('btn-defend');
-      if (badge) {
-        badge.className = 'action-badge ' + d.action;
-        badge.textContent = d.action === 'attack' ? '⚔ ATTACK' : '🛡 DEFEND';
-      }
-      if (atk) atk.classList.toggle('active', d.action === 'attack');
-      if (def) def.classList.toggle('active', d.action === 'defend');
+    EventBus.on('battle:actionChange',function(d){
+      var badge=document.getElementById('action-badge'),atk=document.getElementById('btn-attack'),def=document.getElementById('btn-defend');
+      if(badge){badge.className='action-badge '+d.action;badge.textContent=d.action==='attack'?'⚔ ATTACK':'🛡 DEFEND';}
+      if(atk)atk.classList.toggle('active',d.action==='attack');
+      if(def)def.classList.toggle('active',d.action==='defend');
     });
 
-    // HP bars
-    function setHPBar(fillId, numId, hp, maxHP) {
-      var bar = document.getElementById(fillId);
-      var num = document.getElementById(numId);
-      var pct = Math.max(0, Math.min(100, (hp / maxHP) * 100));
-      if (bar) bar.style.width = pct + '%';
-      if (num) num.textContent = hp;
+    function setHPBar(fillId,numId,hp,maxHP){
+      var bar=document.getElementById(fillId),num=document.getElementById(numId),pct=Math.max(0,Math.min(100,(hp/maxHP)*100));
+      if(bar)bar.style.width=pct+'%'; if(num)num.textContent=hp;
     }
 
-    EventBus.on('battle:started', function(d) {
-      var b = d.battle, w = d.warrior;
-      var user = State.getUser();
-      var pName = document.getElementById('battle-player-name');
-      var eName = document.getElementById('battle-enemy-name');
-      if (pName) pName.textContent = (user ? user.username : 'PLAYER').toUpperCase();
-      if (eName) eName.textContent = b.enemyName.toUpperCase();
-      document.getElementById('player-sprite').textContent = w.emoji;
-      document.getElementById('enemy-sprite').textContent  = b.enemySprite;
-
-      // Rebuild HP text to show warrior's correct max HP
-      var hudPlayerHp = document.querySelector('.hud-side:not(.enemy) .hud-hp-text');
-      if (hudPlayerHp) hudPlayerHp.innerHTML = '<span id="player-hp-num">' + b.playerHP + '</span> / ' + b.maxPlayerHP + ' HP';
-
-      setHPBar('player-hp-bar', 'player-hp-num', b.playerHP, b.maxPlayerHP);
-      setHPBar('enemy-hp-bar',  'enemy-hp-num',  b.enemyHP,  25);
+    EventBus.on('battle:started',function(d){
+      var b=d.battle,w=d.warrior,user=State.getUser();
+      var pName=document.getElementById('battle-player-name'),eName=document.getElementById('battle-enemy-name');
+      if(pName)pName.textContent=(user?user.username:'PLAYER').toUpperCase();
+      if(eName)eName.textContent=b.enemyName.toUpperCase();
+      document.getElementById('player-sprite').textContent=w.emoji;
+      document.getElementById('enemy-sprite').textContent=b.enemySprite;
+      var hudPlayerHp=document.querySelector('.hud-side:not(.enemy) .hud-hp-text');
+      if(hudPlayerHp)hudPlayerHp.innerHTML='<span id="player-hp-num">'+b.playerHP+'</span> / '+b.maxPlayerHP+' HP';
+      setHPBar('player-hp-bar','player-hp-num',b.playerHP,b.maxPlayerHP);
+      setHPBar('enemy-hp-bar','enemy-hp-num',b.enemyHP,25);
       renderDigits(true);
     });
 
-    // Damage float helper
-    function showDmgFloat(id, text, color) {
-      var el = document.getElementById(id);
-      if (!el) return;
-      el.textContent = text;
-      el.style.color = color;
-      el.classList.remove('show');
-      void el.offsetWidth;
-      el.classList.add('show');
-      setTimeout(function() { el.classList.remove('show'); }, 900);
+    EventBus.on('battle:round',function(d){
+      var rnd=document.getElementById('hud-round'); if(rnd)rnd.textContent='ROUND '+d.round;
+    });
+
+    function showDmgFloat(id,text,color){
+      var el=document.getElementById(id); if(!el)return;
+      el.textContent=text; el.style.color=color; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+      setTimeout(function(){el.classList.remove('show');},900);
+    }
+    EventBus.on('battle:playerHit',function(d){
+      var maxHP=State.getBattle()?State.getBattle().maxPlayerHP:25;
+      setHPBar('player-hp-bar','player-hp-num',d.hp,maxHP);
+      var ps=document.getElementById('player-sprite');
+      if(ps){ps.classList.remove('hurt');void ps.offsetWidth;ps.classList.add('hurt');setTimeout(function(){ps.classList.remove('hurt');},400);}
+      showDmgFloat('player-dmg','-'+d.damage,'#4488ff');
+      if(d.fromEnemy){var es=document.getElementById('enemy-sprite');if(es){es.classList.remove('attacking');void es.offsetWidth;es.classList.add('attacking');setTimeout(function(){es.classList.remove('attacking');},400);}}
+    });
+    EventBus.on('battle:enemyHit',function(d){
+      setHPBar('enemy-hp-bar','enemy-hp-num',d.hp,25);
+      var es=document.getElementById('enemy-sprite');
+      if(es){es.classList.remove('hurt');void es.offsetWidth;es.classList.add('hurt');setTimeout(function(){es.classList.remove('hurt');},400);}
+      var ps=document.getElementById('player-sprite');
+      if(ps){ps.classList.remove('attacking');void ps.offsetWidth;ps.classList.add('attacking');setTimeout(function(){ps.classList.remove('attacking');},400);}
+      showDmgFloat('enemy-dmg','-'+d.damage+(d.isCrit?' 🔥':''),'#4488ff');
+    });
+    EventBus.on('battle:dodge',function(){
+      var ps=document.getElementById('player-sprite');
+      if(ps){ps.classList.remove('attacking');void ps.offsetWidth;ps.classList.add('attacking');setTimeout(function(){ps.classList.remove('attacking');},400);}
+    });
+
+    // ── Power-up UI ──────────────────────────────────────
+    function updatePowerupUI(powerups) {
+      ['shield','rage','heal','freeze'].forEach(function(type) {
+        var btn   = document.getElementById('pu-' + type);
+        var count = document.getElementById('pu-count-' + type);
+        var n     = (powerups && powerups[type] != null) ? powerups[type] : 0;
+        if (count) count.textContent = n;
+        if (btn)   btn.disabled = (n <= 0);
+      });
     }
 
-    EventBus.on('battle:playerHit', function(d) {
+    EventBus.on('battle:powerupsUpdate', function(d) {
+      updatePowerupUI(d.powerups);
+    });
+
+    EventBus.on('battle:playerHeal', function(d) {
       var maxHP = State.getBattle() ? State.getBattle().maxPlayerHP : 25;
       setHPBar('player-hp-bar', 'player-hp-num', d.hp, maxHP);
-      var ps = document.getElementById('player-sprite');
-      if (ps) { ps.classList.remove('hurt'); void ps.offsetWidth; ps.classList.add('hurt'); setTimeout(function(){ps.classList.remove('hurt');},400); }
-      showDmgFloat('player-dmg', '-' + d.damage, '#ff4455');
-      if (d.fromEnemy) {
-        var es = document.getElementById('enemy-sprite');
-        if (es) { es.classList.remove('attacking'); void es.offsetWidth; es.classList.add('attacking'); setTimeout(function(){es.classList.remove('attacking');},400); }
-      }
     });
 
-    EventBus.on('battle:enemyHit', function(d) {
-      setHPBar('enemy-hp-bar', 'enemy-hp-num', d.hp, 25);
-      var es = document.getElementById('enemy-sprite');
-      if (es) { es.classList.remove('hurt'); void es.offsetWidth; es.classList.add('hurt'); setTimeout(function(){es.classList.remove('hurt');},400); }
-      var ps = document.getElementById('player-sprite');
-      if (ps) { ps.classList.remove('attacking'); void ps.offsetWidth; ps.classList.add('attacking'); setTimeout(function(){ps.classList.remove('attacking');},400); }
-      showDmgFloat('enemy-dmg', '-' + d.damage + (d.isCrit ? ' 🔥' : ''), '#ff4455');
-    });
+    // Show powerup counts from localStorage immediately on load
+    (function() {
+      try {
+        var inv = JSON.parse(localStorage.getItem('pw_inventory') || '{}');
+        updatePowerupUI({ shield: inv.shield||0, rage: inv.rage||0, heal: inv.heal||0, freeze: inv.freeze||0 });
+      } catch(e) {}
+    })();
 
-    EventBus.on('battle:dodge', function() {
-      var ps = document.getElementById('player-sprite');
-      if (ps) { ps.classList.remove('attacking'); void ps.offsetWidth; ps.classList.add('attacking'); setTimeout(function(){ps.classList.remove('attacking');},400); }
-    });
-
-    // Toast
     var toastTimer;
-    EventBus.on('ui:toast', function(d) {
-      var t = document.getElementById('toast');
-      if (!t) return;
-      t.textContent = d.message;
-      t.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2600);
+    EventBus.on('ui:toast',function(d){
+      var t=document.getElementById('toast'); if(!t)return;
+      t.textContent=d.message; t.classList.add('show');
+      clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.classList.remove('show');},2600);
     });
-
   })();
 
-  // Keyboard shortcuts
-  document.addEventListener('keydown', function(e) {
-    if (e.key >= '0' && e.key <= '9') EventBus.emit('battle:doAnswer', { digit: parseInt(e.key) });
-    if (e.key === 'a' || e.key === 'A') EventBus.emit('battle:doSetAction', { action: 'attack' });
-    if (e.key === 'd' || e.key === 'D') EventBus.emit('battle:doSetAction', { action: 'defend' });
+  document.addEventListener('keydown',function(e){
+    if(e.key>='0'&&e.key<='9')EventBus.emit('battle:doAnswer',{digit:parseInt(e.key)});
+    if(e.key==='a'||e.key==='A')EventBus.emit('battle:doSetAction',{action:'attack'});
+    if(e.key==='d'||e.key==='D')EventBus.emit('battle:doSetAction',{action:'defend'});
   });
 
-  // Start
-  setTimeout(function() {
-    EventBus.emit('battle:start', { difficulty: difficulty });
-  }, 100);
+  setTimeout(function(){EventBus.emit('battle:start',{difficulty:difficulty});},100);
+  // Stop menu BGM, start battle BGM
+  EventBus.emit('sfx:bgm:stop');
+  setTimeout(function(){ EventBus.emit('sfx:bgm:start',{type:'battle'}); }, 800);
 
-  // Navigate to result on battle end
-  EventBus.on('battle:end', function(data) {
-    sessionStorage.setItem('pw_result', JSON.stringify(data));
-    setTimeout(function() {
-      window.location.href = 'result.html';
-    }, 1200);
+  EventBus.on('battle:end',function(data){
+    EventBus.emit('sfx:bgm:fade');
+    sessionStorage.setItem('pw_result',JSON.stringify(data));
+    setTimeout(function(){window.location.href='result.html';},1200);
   });
+</script>
+
+// ── BGM: switch to battle music ──
+(function(){
+  EventBus.emit('sfx:bgm:stop');
+  setTimeout(function(){
+    EventBus.emit('sfx:bgm:start', {type:'battle'});
+  }, 600);
+})();
+
+
+<script>
+// ── BGM: switch to battle ──
+(function(){
+  if(window.EventBus){
+    EventBus.emit('sfx:bgm:stop');
+    setTimeout(function(){
+      EventBus.emit('sfx:bgm:start',{type:'battle'});
+    }, 500);
+  }
+})();
 </script>
 </body>
 </html>

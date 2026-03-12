@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════
-// battle.js  —  Battle Engine + Coin Rewards
-// Power-ups come from shop inventory (not free anymore)
+// battle.js  —  Battle Engine + Coin Rewards  (FIXED v2)
+// FIX: Inventory is READ not wiped. Items consumed on use.
 // ═══════════════════════════════════════════════════════
 const BattleEngine = (function () {
 
@@ -16,15 +16,34 @@ const BattleEngine = (function () {
     { name:'GLITCH BOSS', sprite:'💀', hp:30 },
   ];
 
-  // Coin rewards
   var COINS = {
     correctAnswer: 5,
-    comboBonus:    10,   // on combo ≥ 3
+    comboBonus:    10,
     winBase:       50,
     winEasy:       0,
     winNormal:     20,
     winHard:       50,
   };
+
+  // ── Read inventory (DO NOT wipe it) ──────────────────
+  function readInv() {
+    try {
+      var stored = JSON.parse(localStorage.getItem('pw_inventory') || '{}');
+      return {
+        shield: stored.shield || 0,
+        rage:   stored.rage   || 0,
+        heal:   stored.heal   || 0,
+        freeze: stored.freeze || 0,
+      };
+    } catch(e) {
+      return { shield:0, rage:0, heal:0, freeze:0 };
+    }
+  }
+
+  // ── Write inventory back after consuming ─────────────
+  function writeInv(inv) {
+    localStorage.setItem('pw_inventory', JSON.stringify(inv));
+  }
 
   // ── Start ─────────────────────────────────────────────
   function start(data) {
@@ -34,15 +53,8 @@ const BattleEngine = (function () {
     var timeLimit  = State.getDifficulty(difficulty);
     var maxHP      = warrior.hp || 25;
 
-    // Load power-ups from inventory (direct localStorage)
-    var inv = (function() {
-      try {
-        var stored = JSON.parse(localStorage.getItem('pw_inventory') || '{"shield":0,"rage":0,"heal":0,"freeze":0}');
-        // Clear inventory — consumed into battle
-        localStorage.setItem('pw_inventory', JSON.stringify({shield:0,rage:0,heal:0,freeze:0}));
-        return stored;
-      } catch(e) { return {shield:0,rage:0,heal:0,freeze:0}; }
-    })();
+    // READ inventory — do NOT wipe it here
+    var inv = readInv();
 
     battle = {
       difficulty, warrior,
@@ -62,9 +74,8 @@ const BattleEngine = (function () {
       puzzle:       null,
       startTime:    Date.now(),
       coinsEarned:  0,
-
-      // Power-ups from inventory
-      powerups:     { shield: inv.shield||0, rage: inv.rage||0, heal: inv.heal||0, freeze: inv.freeze||0 },
+      // Copy inventory into battle state
+      powerups:     { shield: inv.shield, rage: inv.rage, heal: inv.heal, freeze: inv.freeze },
       shieldActive: false,
       rageActive:   false,
       freezeActive: false,
@@ -164,9 +175,7 @@ const BattleEngine = (function () {
       battle.correct++; battle.combo++;
       if (battle.combo > battle.maxCombo) battle.maxCombo = battle.combo;
       EventBus.emit('sfx:play', { name: 'correct' });
-      // 🪙 Earn coins for correct answer
       earnCoins(COINS.correctAnswer, '+' + COINS.correctAnswer + ' 🪙');
-      // 🪙 Bonus coins for combo
       if (battle.combo >= 3) earnCoins(COINS.comboBonus, 'COMBO BONUS +' + COINS.comboBonus + ' 🪙');
       handleCorrectAnswer();
     } else {
@@ -177,10 +186,10 @@ const BattleEngine = (function () {
     State.updateBattle({ correct: battle.correct, wrong: battle.wrong, combo: battle.combo });
   }
 
-  // ── Earn coins helper (direct localStorage) ──────────
+  // ── Earn coins ────────────────────────────────────────
   function earnCoins(amount, msg) {
     battle.coinsEarned += amount;
-    var current = parseInt(localStorage.getItem('pw_coins') || '0', 10);
+    var current  = parseInt(localStorage.getItem('pw_coins') || '0', 10);
     var newTotal = current + amount;
     localStorage.setItem('pw_coins', newTotal.toString());
     EventBus.emit('battle:coinsEarned', { amount, total: newTotal, msg });
@@ -268,15 +277,24 @@ const BattleEngine = (function () {
     setTimeout(loadNextPuzzle, 1000);
   }
 
-  // ── Use power-up ──────────────────────────────────────
+  // ── Use power-up (consumes from localStorage too) ────
   function usePowerup(data) {
     var type = data.type;
-    if (!battle || !battle.powerups[type] || battle.powerups[type] <= 0) {
-      EventBus.emit('ui:toast', { message: '❌ No ' + type + ' in inventory! Buy from shop.' });
+    if (!battle) return;
+
+    // Check battle state count
+    if (!battle.powerups[type] || battle.powerups[type] <= 0) {
+      EventBus.emit('ui:toast', { message: '❌ No ' + type + ' left! Buy more from shop.' });
       return;
     }
+
+    // Consume from battle state AND localStorage
     battle.powerups[type]--;
-    EventBus.emit('sfx:play', { name: 'combo' });
+    var inv = readInv();
+    inv[type] = Math.max(0, (inv[type] || 0) - 1);
+    writeInv(inv);
+
+    EventBus.emit('sfx:play', { name: 'powerUp' });
 
     if (type === 'shield') {
       battle.shieldActive = true;
@@ -295,7 +313,7 @@ const BattleEngine = (function () {
       EventBus.emit('ui:toast',   { message: '💚 +' + healed + ' HP!' });
     } else if (type === 'freeze') {
       battle.freezeActive = true;
-      EventBus.emit('battle:log', { message: '❄️ ICE BLAST! Enemy frozen!' });
+      EventBus.emit('battle:log', { message: '❄️ ICE BLAST! Enemy frozen next wrong answer!' });
       EventBus.emit('ui:toast',   { message: '❄️ Enemy frozen!' });
     }
 
@@ -317,7 +335,6 @@ const BattleEngine = (function () {
     running = false;
     clearInterval(timer);
 
-    // 🪙 Win bonus coins
     if (won) {
       var bonus = COINS.winBase;
       if      (battle.difficulty === 'hard')   bonus += COINS.winHard;
@@ -337,7 +354,7 @@ const BattleEngine = (function () {
       difficulty:  battle.difficulty,
       enemyName:   battle.enemyName,
       coinsEarned: battle.coinsEarned,
-      totalCoins:  State.getCoins(),
+      totalCoins:  parseInt(localStorage.getItem('pw_coins') || '0', 10),
     };
 
     API.postResult({
