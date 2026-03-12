@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Puzzle Warriors — Enter</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=Rajdhani:wght@300;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=Rajdhani:wght@300;500;600;700&family=Share+Tech+Mono&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../shared/styles.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -24,7 +24,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Ra
 
 .auth-wrap{position:relative;z-index:10;display:flex;align-items:center;justify-content:center;height:100vh;padding:20px;}
 
-/* THE PANEL */
 .panel-outer{
   position:relative;width:100%;max-width:460px;
   opacity:0;transform:translateY(50px);
@@ -32,7 +31,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Ra
 }
 @keyframes panelRise{to{opacity:1;transform:translateY(0);}}
 
-/* SVG border with animated fire */
 .panel-border{position:absolute;inset:-2px;z-index:0;pointer-events:none;}
 .panel-border svg{width:100%;height:100%;}
 
@@ -54,57 +52,66 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Ra
 @keyframes iconBeat{0%,100%{filter:drop-shadow(0 0 18px rgba(255,120,0,.9));transform:scale(1)}50%{filter:drop-shadow(0 0 35px rgba(255,200,0,1));transform:scale(1.07)}}
 
 .crest-title{
-  font-family:'Uncial Antiqua',serif;font-size:24px;letter-spacing:5px;
+  font-family:'Uncial Antiqua',serif;font-size:26px;letter-spacing:5px;
   background:linear-gradient(180deg,#fff8e0 0%,#ffcc44 30%,#ff7700 70%,#aa3300 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
   filter:drop-shadow(0 0 10px rgba(255,100,0,.5));
 }
-.crest-sub{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:5px;color:rgba(255,200,100,.25);margin-top:4px;}
+/* ── INCREASED: sub title visibility ── */
+.crest-sub{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:5px;color:rgba(255,210,120,.65);margin-top:6px;}
 
 /* ── TABS ── */
 .tabs{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:24px 0 20px;
   background:rgba(0,0,0,.6);border:1px solid rgba(255,80,0,.15);
   clip-path:polygon(5px 0%,calc(100% - 5px) 0%,100% 5px,100% calc(100% - 5px),calc(100% - 5px) 100%,5px 100%,0% calc(100% - 5px),0% 5px);
   padding:4px;}
-.tab{padding:11px;border:none;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;letter-spacing:4px;cursor:pointer;transition:all .2s;background:transparent;color:rgba(255,255,255,.28);text-transform:uppercase;
+/* ── INCREASED: tab font size + brighter inactive ── */
+.tab{padding:13px;border:none;font-family:'Cinzel',serif;font-weight:700;font-size:14px;letter-spacing:4px;cursor:pointer;transition:all .2s;background:transparent;color:rgba(255,210,150,.45);text-transform:uppercase;
   clip-path:polygon(4px 0%,calc(100% - 4px) 0%,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0% calc(100% - 4px),0% 4px);}
-.tab.active{background:linear-gradient(135deg,rgba(120,30,0,.7),rgba(60,10,0,.9));color:#ffcc88;box-shadow:0 0 20px rgba(200,60,0,.3),inset 0 1px 0 rgba(255,150,50,.15);}
-.tab:hover:not(.active){color:rgba(255,200,100,.5);}
+.tab.active{background:linear-gradient(135deg,rgba(120,30,0,.7),rgba(60,10,0,.9));color:#ffe8aa;box-shadow:0 0 20px rgba(200,60,0,.3),inset 0 1px 0 rgba(255,150,50,.15);}
+.tab:hover:not(.active){color:rgba(255,220,140,.7);}
 
 /* Error */
 .auth-error{display:none;margin-bottom:14px;
   background:rgba(120,0,0,.25);border:1px solid rgba(255,50,50,.3);
-  padding:10px 14px;font-family:'Share Tech Mono',monospace;font-size:11px;color:#ff8888;
+  padding:10px 14px;font-family:'Share Tech Mono',monospace;font-size:12px;color:#ff9999;
   clip-path:polygon(4px 0%,calc(100% - 4px) 0%,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0% calc(100% - 4px),0% 4px);
   animation:errShake .4s ease;}
 @keyframes errShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 
 /* Fields */
-.field{margin-bottom:16px;opacity:0;animation:fadeUp .5s ease forwards;}
+.field{margin-bottom:18px;opacity:0;animation:fadeUp .5s ease forwards;}
 .field:nth-child(1){animation-delay:.62s}.field:nth-child(2){animation-delay:.74s}.field:nth-child(3){animation-delay:.86s}
 
-.field label{display:block;margin-bottom:6px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:4px;color:rgba(255,180,80,.4);}
+/* ── INCREASED: label font size + much brighter ── */
+.field label{display:block;margin-bottom:8px;font-family:'Cinzel',serif;font-size:12px;font-weight:700;letter-spacing:4px;color:rgba(255,210,130,.8);text-transform:uppercase;}
+
+/* ── INCREASED: input font size + brighter text ── */
 .field input{
-  width:100%;height:50px;
-  background:rgba(0,0,0,.7);
+  width:100%;height:52px;
+  background:rgba(0,0,0,.6);
   border:none;
-  border-bottom:1px solid rgba(255,80,0,.3);
+  border-bottom:2px solid rgba(255,100,0,.4);
   padding:0 16px;
-  font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:500;color:#ffeecc;
+  font-family:'Cinzel',serif;font-size:17px;font-weight:700;color:#ffe8c0;
   outline:none;transition:all .25s;
   caret-color:#ff9a00;
 }
-.field input::placeholder{color:rgba(255,200,100,.15);}
+.field input::placeholder{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:500;color:rgba(255,200,120,.3);}
 .field input:focus{
-  border-bottom-color:rgba(255,150,0,.8);
-  background:rgba(80,20,0,.25);
-  box-shadow:0 4px 20px rgba(255,80,0,.1),inset 0 -2px 0 rgba(255,120,0,.4);
+  border-bottom-color:rgba(255,160,0,.9);
+  background:rgba(80,20,0,.3);
+  box-shadow:0 4px 20px rgba(255,80,0,.12),inset 0 -2px 0 rgba(255,140,0,.5);
+  color:#fff8e8;
 }
+
+/* password hint */
+.pass-hint{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,200,120,.45);letter-spacing:1px;}
 
 /* Submit */
 .btn-submit{
-  width:100%;height:56px;margin-top:12px;border:none;cursor:pointer;
-  font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;letter-spacing:5px;text-transform:uppercase;
+  width:100%;height:56px;margin-top:14px;border:none;cursor:pointer;
+  font-family:'Cinzel',serif;font-weight:700;font-size:15px;letter-spacing:5px;text-transform:uppercase;
   position:relative;overflow:hidden;transition:transform .12s,filter .15s;
   clip-path:polygon(8px 0%,calc(100% - 8px) 0%,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0% calc(100% - 8px),0% 8px);
   opacity:0;animation:fadeUp .5s ease .96s forwards;
@@ -112,30 +119,28 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Ra
 .btn-submit:hover{transform:scale(1.02);filter:brightness(1.2);}
 .btn-submit:active{transform:scale(.97);}
 
-.btn-login-s{background:linear-gradient(135deg,#2a0800,#6a1800,#2a0800);background-size:200%;color:#ffcc88;
+.btn-login-s{background:linear-gradient(135deg,#2a0800,#6a1800,#2a0800);background-size:200%;color:#ffe8aa;
   box-shadow:0 0 0 1px rgba(200,60,0,.5),0 0 30px rgba(180,40,0,.3);
   animation:fadeUp .5s ease .96s forwards,bgShift 4s ease infinite;}
 @keyframes bgShift{0%,100%{background-position:0%}50%{background-position:100%}}
 
-.btn-register-s{background:linear-gradient(135deg,#001a0a,#004020,#001a0a);background-size:200%;color:#88ffcc;
+.btn-register-s{background:linear-gradient(135deg,#001a0a,#004020,#001a0a);background-size:200%;color:#aaffdd;
   box-shadow:0 0 0 1px rgba(0,150,80,.4),0 0 30px rgba(0,120,60,.2);}
 
 .btn-submit .sweep{position:absolute;top:0;left:-100%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);animation:swp 3s ease infinite 2.5s;}
 @keyframes swp{0%{left:-100%}50%,100%{left:150%}}
 
-/* Fire lava drip on top */
 .btn-submit::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#ffaa00,#ff6600,#ffaa00,transparent);animation:fireTop 2.5s ease infinite;}
 @keyframes fireTop{0%{opacity:0;transform:scaleX(.3)}40%{opacity:1}100%{opacity:0;transform:scaleX(1.2)}}
 
 /* Back */
-.btn-back{width:100%;height:44px;margin-top:10px;background:transparent;
-  border:1px solid rgba(255,255,255,.08);
-  font-family:'Rajdhani',sans-serif;font-weight:600;font-size:12px;letter-spacing:3px;
-  color:rgba(255,255,255,.25);cursor:pointer;transition:all .2s;text-transform:uppercase;
+.btn-back{width:100%;height:46px;margin-top:12px;background:transparent;
+  border:1px solid rgba(255,255,255,.12);
+  font-family:'Cinzel',serif;font-weight:600;font-size:12px;letter-spacing:3px;
+  color:rgba(255,220,160,.5);cursor:pointer;transition:all .2s;text-transform:uppercase;
   clip-path:polygon(4px 0%,calc(100% - 4px) 0%,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0% calc(100% - 4px),0% 4px);}
-.btn-back:hover{border-color:rgba(255,150,50,.3);color:rgba(255,200,100,.6);}
+.btn-back:hover{border-color:rgba(255,150,50,.35);color:rgba(255,210,120,.8);}
 
-/* Panel fire border SVG */
 .fire-border-path{stroke-dasharray:1800;stroke-dashoffset:1800;animation:borderDraw 2s ease .3s forwards;}
 @keyframes borderDraw{to{stroke-dashoffset:0;}}
 
@@ -158,7 +163,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Ra
 <div class="auth-wrap">
   <div class="panel-outer">
 
-    <!-- Animated SVG fire border -->
     <div class="panel-border">
       <svg viewBox="0 0 460 560" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -169,10 +173,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Ra
           </linearGradient>
           <filter id="fireGlow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         </defs>
-        <!-- Octagon border -->
         <path class="fire-border-path" d="M20,2 L440,2 L458,20 L458,540 L440,558 L20,558 L2,540 L2,20 Z"
           fill="none" stroke="url(#fb)" stroke-width="1.5" filter="url(#fireGlow)" opacity="0.8"/>
-        <!-- Corner accents -->
         <path d="M2,20 L2,2 L20,2" fill="none" stroke="#ffaa00" stroke-width="2" opacity="0.9"/>
         <path d="M440,2 L458,2 L458,20" fill="none" stroke="#ffaa00" stroke-width="2" opacity="0.9"/>
         <path d="M458,540 L458,558 L440,558" fill="none" stroke="#ffaa00" stroke-width="2" opacity="0.9"/>
@@ -195,16 +197,37 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Ra
       <div id="auth-error" class="auth-error"></div>
 
       <div id="form-login">
-        <div class="field"><label>Username</label><input type="text" id="login-user" placeholder="Enter username" autocomplete="off"></div>
-        <div class="field"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••"></div>
-        <button class="btn-submit btn-login-s" onclick="Auth.login()"><div class="sweep"></div><span style="position:relative;z-index:1;">LOGIN →</span></button>
+        <div class="field">
+          <label>Username</label>
+          <input type="text" id="login-user" placeholder="Enter your username" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="login-pass" placeholder="Enter your password">
+        </div>
+        <button class="btn-submit btn-login-s" onclick="Auth.login()">
+          <div class="sweep"></div>
+          <span style="position:relative;z-index:1;">LOGIN →</span>
+        </button>
       </div>
 
       <div id="form-register" style="display:none">
-        <div class="field"><label>Username</label><input type="text" id="reg-user" placeholder="Choose a username" autocomplete="off"></div>
-        <div class="field"><label>Email</label><input type="email" id="reg-email" placeholder="your@email.com"></div>
-        <div class="field"><label>Password <span style="font-size:9px;color:rgba(255,200,100,.2);letter-spacing:0">(min 6 chars)</span></label><input type="password" id="reg-pass" placeholder="••••••••"></div>
-        <button class="btn-submit btn-register-s" onclick="Auth.register()"><div class="sweep"></div><span style="position:relative;z-index:1;">CREATE ACCOUNT →</span></button>
+        <div class="field">
+          <label>Username</label>
+          <input type="text" id="reg-user" placeholder="Choose a username" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="reg-email" placeholder="your@email.com">
+        </div>
+        <div class="field">
+          <label>Password &nbsp;<span class="pass-hint">(min 6 chars)</span></label>
+          <input type="password" id="reg-pass" placeholder="Create a password">
+        </div>
+        <button class="btn-submit btn-register-s" onclick="Auth.register()">
+          <div class="sweep"></div>
+          <span style="position:relative;z-index:1;">CREATE ACCOUNT →</span>
+        </button>
       </div>
 
       <button class="btn-back" onclick="window.location.href='../index.html'">← BACK TO HOME</button>
@@ -232,7 +255,6 @@ document.addEventListener('mousemove',function(e){cur.style.left=e.clientX+'px';
 document.addEventListener('mousedown',function(){cur.classList.add('cl');});
 document.addEventListener('mouseup',function(){cur.classList.remove('cl');});
 
-/* fire bg */
 (function(){
   var C=document.getElementById('bg-canvas'),ctx=C.getContext('2d'),W,H,pts=[],t=0;
   function resize(){W=C.width=innerWidth;H=C.height=innerHeight;}
@@ -254,7 +276,6 @@ document.addEventListener('mouseup',function(){cur.classList.remove('cl');});
   }
   draw();
 })();
-/* embers */
 (function(){
   var C=document.getElementById('ember-canvas'),ctx=C.getContext('2d'),W,H,em=[];
   function resize(){W=C.width=innerWidth;H=C.height=innerHeight;}

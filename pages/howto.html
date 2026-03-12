@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Puzzle Warriors — How To Play</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=Rajdhani:wght@300;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=Rajdhani:wght@300;500;600;700&family=Share+Tech+Mono&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../shared/styles.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -19,10 +19,10 @@ html,body{width:100%;min-height:100%;background:#000;font-family:'Rajdhani',sans
 #ember-canvas{position:fixed;inset:0;z-index:1;pointer-events:none;}
 .vignette{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse 85% 85% at 50% 50%,transparent 20%,rgba(0,0,0,.85) 100%);}
 .scan{position:fixed;inset:0;z-index:2;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 3px);}
-.page{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 20px 48px;}
+.page{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 20px 56px;}
 
-/* HEADER */
-.page-header{text-align:center;margin-bottom:32px;opacity:0;transform:translateY(-20px);animation:hIn .8s cubic-bezier(.16,1,.3,1) .1s forwards;}
+/* ── HEADER ── */
+.page-header{text-align:center;margin-bottom:36px;opacity:0;transform:translateY(-20px);animation:hIn .8s cubic-bezier(.16,1,.3,1) .1s forwards;}
 @keyframes hIn{to{opacity:1;transform:translateY(0)}}
 .page-rune{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:6px;color:rgba(255,150,0,.3);margin-bottom:8px;}
 .page-title{font-family:'Uncial Antiqua',serif;font-size:clamp(26px,4.5vw,50px);letter-spacing:5px;background:linear-gradient(180deg,#fff8e0 0%,#ffcc44 25%,#ff8800 60%,#cc4400 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 22px rgba(255,120,0,.6));}
@@ -30,31 +30,27 @@ html,body{width:100%;min-height:100%;background:#000;font-family:'Rajdhani',sans
 .page-rule{height:2px;width:0%;margin:10px auto 0;background:linear-gradient(90deg,transparent,#ff8800,#ffcc00,#ff8800,transparent);box-shadow:0 0 10px #ff6600;animation:ruleX .7s ease .6s forwards;}
 @keyframes ruleX{to{width:60%;}}
 
-/* CARDS GRID */
-.cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:100%;max-width:760px;margin-bottom:28px;}
+/* ── SECTION TITLES ── */
+.section{width:100%;max-width:900px;margin-bottom:36px;}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:18px;opacity:0;animation:fadeU .5s ease forwards;}
+.section-head-icon{font-size:28px;filter:drop-shadow(0 0 10px rgba(255,120,0,.6));}
+.section-title{font-family:'Uncial Antiqua',serif;font-size:clamp(16px,2.5vw,24px);letter-spacing:4px;
+  background:linear-gradient(90deg,#ffcc88,#ff8800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.section-rule{flex:1;height:1px;background:linear-gradient(90deg,rgba(255,100,0,.3),transparent);}
+
+/* ── BASIC HOW-TO CARDS (3 col) ── */
+.cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;}
 @media(max-width:600px){.cards-grid{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:380px){.cards-grid{grid-template-columns:1fr;}}
 
 .how-card{
-  position:relative;
-  background:linear-gradient(160deg,#130a00,#0a0500,#0e0312);
-  border:1px solid rgba(255,100,0,.18);
-  padding:24px 18px 20px;text-align:center;overflow:hidden;
+  position:relative;background:linear-gradient(160deg,#130a00,#0a0500,#0e0312);
+  border:1px solid rgba(255,100,0,.18);padding:22px 16px 18px;text-align:center;overflow:hidden;
   clip-path:polygon(10px 0%,calc(100% - 10px) 0%,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0% calc(100% - 10px),0% 10px);
-  opacity:0;transform:translateY(20px) scale(.94);
+  opacity:0;transform:translateY(18px) scale(.94);
   transition:transform .2s,border-color .2s,box-shadow .2s;
 }
-.how-card:nth-child(1){animation:cardIn .5s ease .5s forwards;}
-.how-card:nth-child(2){animation:cardIn .5s ease .62s forwards;}
-.how-card:nth-child(3){animation:cardIn .5s ease .74s forwards;}
-.how-card:nth-child(4){animation:cardIn .5s ease .86s forwards;}
-.how-card:nth-child(5){animation:cardIn .5s ease .98s forwards;}
-.how-card:nth-child(6){animation:cardIn .5s ease 1.1s forwards;}
-@keyframes cardIn{to{opacity:1;transform:translateY(0) scale(1)}}
-
-.how-card:hover{transform:translateY(-5px) scale(1.02)!important;border-color:rgba(255,150,0,.4);box-shadow:0 0 30px rgba(150,50,0,.25),0 15px 35px rgba(0,0,0,.5);}
-
-/* Top accent line, per-card color */
+.how-card:hover{transform:translateY(-5px) scale(1.02)!important;border-color:rgba(255,150,0,.4);box-shadow:0 0 28px rgba(150,50,0,.22),0 14px 32px rgba(0,0,0,.5);}
 .how-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:.5;transition:opacity .2s;}
 .how-card:hover::before{opacity:1;}
 .how-card:nth-child(1)::before{background:linear-gradient(90deg,transparent,#ff4444,transparent);}
@@ -63,33 +59,141 @@ html,body{width:100%;min-height:100%;background:#000;font-family:'Rajdhani',sans
 .how-card:nth-child(4)::before{background:linear-gradient(90deg,transparent,#ff6600,transparent);}
 .how-card:nth-child(5)::before{background:linear-gradient(90deg,transparent,#aa44ff,transparent);}
 .how-card:nth-child(6)::before{background:linear-gradient(90deg,transparent,#00ff88,transparent);}
-
-/* Corner ticks */
 .how-card::after{content:'';position:absolute;bottom:4px;right:4px;width:8px;height:8px;border-bottom:1px solid rgba(255,150,50,.2);border-right:1px solid rgba(255,150,50,.2);transition:width .2s,height .2s;}
 .how-card:hover::after{width:14px;height:14px;}
-
-.card-icon{font-size:38px;display:block;margin-bottom:12px;filter:drop-shadow(0 0 8px rgba(255,100,0,.5));animation:iconFloat 3s ease-in-out infinite;}
-.how-card:nth-child(1) .card-icon{animation-delay:0s;}
-.how-card:nth-child(2) .card-icon{animation-delay:.5s;}
-.how-card:nth-child(3) .card-icon{animation-delay:1s;}
-.how-card:nth-child(4) .card-icon{animation-delay:1.5s;}
-.how-card:nth-child(5) .card-icon{animation-delay:2s;}
-.how-card:nth-child(6) .card-icon{animation-delay:2.5s;}
+.card-icon{font-size:36px;display:block;margin-bottom:10px;filter:drop-shadow(0 0 8px rgba(255,100,0,.5));animation:iconFloat 3s ease-in-out infinite;}
 @keyframes iconFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.step-badge{position:absolute;top:8px;right:10px;font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,200,100,.5);letter-spacing:1px;}
+.card-title{font-family:'Cinzel',serif;font-size:12px;font-weight:700;letter-spacing:2px;color:#ffcc88;margin-bottom:7px;}
+.card-body{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:500;color:rgba(255,255,255,.85);line-height:1.55;transition:color .2s;}
+.how-card:hover .card-body{color:#ffffff;}
 
-.card-title{font-family:'Uncial Antiqua',serif;font-size:13px;letter-spacing:2px;color:#ffcc88;margin-bottom:8px;}
-.card-body{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:500;color:rgba(255,200,150,.4);line-height:1.55;transition:color .2s;}
-.how-card:hover .card-body{color:rgba(255,220,170,.65);}
+/* stagger animations */
+.s1{animation-delay:.4s}.s2{animation-delay:.52s}.s3{animation-delay:.64s}
+.s4{animation-delay:.76s}.s5{animation-delay:.88s}.s6{animation-delay:1s}
+.card-anim{animation:cardIn .5s ease forwards;}
+@keyframes cardIn{to{opacity:1;transform:translateY(0) scale(1)}}
 
-/* Number step badge */
-.step-badge{position:absolute;top:10px;right:12px;font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,150,50,.2);letter-spacing:1px;}
+/* ── WARRIOR CARDS ── */
+.warrior-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;width:100%;}
+@media(max-width:700px){.warrior-grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:420px){.warrior-grid{grid-template-columns:repeat(2,1fr);}}
 
-/* SCROLL HINT — optional decorative rune row */
-.rune-row{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:8px;color:rgba(255,120,0,.15);margin-bottom:20px;opacity:0;animation:fadeU .5s ease 1.2s forwards;}
+.w-card{
+  position:relative;background:linear-gradient(165deg,#130a00,#0a0500,#0e0312);
+  border:1px solid rgba(255,100,0,.15);padding:18px 12px 14px;text-align:center;overflow:hidden;
+  clip-path:polygon(8px 0%,calc(100% - 8px) 0%,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0% calc(100% - 8px),0% 8px);
+  opacity:0;transform:translateY(16px);transition:transform .2s,border-color .2s,box-shadow .2s;
+}
+.w-card:hover{transform:translateY(-6px)!important;box-shadow:0 0 30px rgba(150,50,0,.22),0 12px 28px rgba(0,0,0,.5);}
+.w-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:.6;}
+.wc-mage::before    {background:linear-gradient(90deg,transparent,#aa44ff,transparent);}
+.wc-knight::before  {background:linear-gradient(90deg,transparent,#4488ff,transparent);}
+.wc-archer::before  {background:linear-gradient(90deg,transparent,#44ff88,transparent);}
+.wc-ninja::before   {background:linear-gradient(90deg,transparent,#aaaaaa,transparent);}
+.wc-berserker::before{background:linear-gradient(90deg,transparent,#ff4400,transparent);}
+.wc-mage:hover    {border-color:rgba(170,68,255,.45);}
+.wc-knight:hover  {border-color:rgba(68,136,255,.45);}
+.wc-archer:hover  {border-color:rgba(68,255,136,.45);}
+.wc-ninja:hover   {border-color:rgba(180,180,180,.35);}
+.wc-berserker:hover{border-color:rgba(255,68,0,.45);}
+
+.w-emoji{font-size:36px;display:block;margin-bottom:8px;filter:drop-shadow(0 0 8px rgba(255,100,0,.4));animation:iconFloat 3s ease-in-out infinite;}
+.w-name{font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:2px;color:#ffcc88;margin-bottom:3px;}
+.w-class{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:rgba(255,200,100,.28);margin-bottom:10px;}
+
+/* Stat bars */
+.w-stats{margin-bottom:8px;}
+.w-stat-row{display:flex;align-items:center;gap:5px;margin-bottom:4px;}
+.w-stat-lbl{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:1px;color:rgba(255,200,100,.35);width:22px;flex-shrink:0;}
+.w-stat-track{flex:1;height:3px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;}
+.w-stat-fill{height:100%;border-radius:2px;width:0%;transition:width 1s cubic-bezier(.4,0,.2,1);}
+.wc-mage     .w-stat-fill{background:linear-gradient(90deg,#6600aa,#aa44ff);}
+.wc-knight   .w-stat-fill{background:linear-gradient(90deg,#002288,#4488ff);}
+.wc-archer   .w-stat-fill{background:linear-gradient(90deg,#006622,#44ff88);}
+.wc-ninja    .w-stat-fill{background:linear-gradient(90deg,#444,#bbb);}
+.wc-berserker .w-stat-fill{background:linear-gradient(90deg,#880000,#ff4400);}
+
+.w-ability{color:rgba(255,255,255,.82);font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:600;color:rgba(255,255,255,.85);line-height:1.4;border-top:1px solid rgba(255,100,0,.1);padding-top:8px;transition:color .2s;}
+.w-card:hover .w-ability{color:rgba(255,220,170,.7);}
+
+/* stagger */
+.w1{animation:cardIn .45s ease .5s forwards;}
+.w2{animation:cardIn .45s ease .6s forwards;}
+.w3{animation:cardIn .45s ease .7s forwards;}
+.w4{animation:cardIn .45s ease .8s forwards;}
+.w5{animation:cardIn .45s ease .9s forwards;}
+
+/* ── POWER-UP CARDS ── */
+.powerup-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;width:100%;}
+@media(max-width:640px){.powerup-grid{grid-template-columns:repeat(2,1fr);}}
+
+.pu-card{
+  position:relative;background:linear-gradient(160deg,#0d0800,#0a0500,#0d0212);
+  border:1px solid rgba(255,100,0,.15);padding:20px 14px 16px;text-align:center;overflow:hidden;
+  clip-path:polygon(8px 0%,calc(100% - 8px) 0%,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0% calc(100% - 8px),0% 8px);
+  opacity:0;transform:translateY(16px);transition:transform .2s,border-color .2s,box-shadow .2s;
+}
+.pu-card:hover{transform:translateY(-5px)!important;}
+.pu-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:.6;}
+.pu-shield::before {background:linear-gradient(90deg,transparent,#4488ff,transparent);}
+.pu-rage::before   {background:linear-gradient(90deg,transparent,#ff4400,transparent);}
+.pu-heal::before   {background:linear-gradient(90deg,transparent,#44ff88,transparent);}
+.pu-freeze::before {background:linear-gradient(90deg,transparent,#00ccff,transparent);}
+.pu-shield:hover  {border-color:rgba(68,136,255,.45);box-shadow:0 0 28px rgba(30,80,200,.2);}
+.pu-rage:hover    {border-color:rgba(255,68,0,.45);box-shadow:0 0 28px rgba(200,50,0,.2);}
+.pu-heal:hover    {border-color:rgba(68,255,136,.45);box-shadow:0 0 28px rgba(0,180,80,.2);}
+.pu-freeze:hover  {border-color:rgba(0,200,255,.45);box-shadow:0 0 28px rgba(0,150,255,.2);}
+
+.pu-emoji{font-size:40px;display:block;margin-bottom:10px;animation:iconFloat 3s ease-in-out infinite;}
+.pu-name{font-family:'Cinzel',serif;font-size:12px;font-weight:700;letter-spacing:2px;margin-bottom:4px;}
+.pu-shield .pu-name{color:#88aaff;}
+.pu-rage   .pu-name{color:#ff8844;}
+.pu-heal   .pu-name{color:#44ff88;}
+.pu-freeze .pu-name{color:#44ccff;}
+
+.pu-cost{display:inline-block;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;
+  background:rgba(200,130,0,.15);color:#ffcc44;padding:2px 10px;border:1px solid rgba(200,130,0,.3);margin-bottom:10px;}
+.pu-desc{color:rgba(255,255,255,.82);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:500;color:rgba(255,255,255,.85);line-height:1.5;transition:color .2s;}
+.pu-card:hover .pu-desc{color:#ffffff;}
+.pu-effect{color:rgba(255,255,255,.6);font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;
+  color:rgba(255,200,100,.28);margin-top:8px;border-top:1px solid rgba(255,100,0,.1);padding-top:7px;line-height:1.5;}
+
+.p1{animation:cardIn .45s ease .5s forwards;}
+.p2{animation:cardIn .45s ease .62s forwards;}
+.p3{animation:cardIn .45s ease .74s forwards;}
+.p4{animation:cardIn .45s ease .86s forwards;}
+
+/* ── FLOW DIAGRAM ── */
+.flow-row{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;margin-top:4px;width:100%;}
+.flow-step{
+  background:linear-gradient(160deg,#130a00,#0a0500);
+  border:1px solid rgba(255,100,0,.2);
+  padding:12px 18px;text-align:center;min-width:110px;
+  clip-path:polygon(6px 0%,calc(100% - 6px) 0%,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0% calc(100% - 6px),0% 6px);
+  opacity:0;animation:cardIn .4s ease forwards;
+}
+.flow-icon{font-size:22px;display:block;margin-bottom:4px;}
+.flow-label{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:rgba(255,200,100,.45);}
+.flow-arrow{font-size:18px;color:rgba(255,120,0,.4);margin:0 4px;flex-shrink:0;}
+
+/* ── TIPS BOX ── */
+.tips-box{
+  width:100%;background:rgba(80,25,0,.15);border:1px solid rgba(255,100,0,.18);
+  padding:20px 24px;
+  clip-path:polygon(8px 0%,calc(100% - 8px) 0%,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0% calc(100% - 8px),0% 8px);
+  opacity:0;animation:fadeU .5s ease 1.2s forwards;
+}
+.tips-title{font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:4px;color:rgba(255,180,80,.55);margin-bottom:12px;}
+.tips-list{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+@media(max-width:500px){.tips-list{grid-template-columns:1fr;}}
+.tip-item{color:rgba(255,255,255,.82);display:flex;align-items:flex-start;gap:10px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:500;color:rgba(255,255,255,.82);line-height:1.5;}
+.tip-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+
+/* ── MISC ── */
+.rune-row{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:8px;color:rgba(255,120,0,.15);margin-bottom:20px;opacity:0;animation:fadeU .5s ease 1.3s forwards;}
+.back-wrap{opacity:0;animation:fadeU .5s ease 1.35s forwards;}
 @keyframes fadeU{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-
-/* BACK */
-.back-wrap{opacity:0;animation:fadeU .5s ease 1.25s forwards;}
 .forge-btn{position:relative;height:50px;min-width:140px;border:none;cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;letter-spacing:5px;text-transform:uppercase;overflow:hidden;transition:transform .12s,filter .15s;clip-path:polygon(8px 0%,calc(100% - 8px) 0%,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0% calc(100% - 8px),0% 8px);display:flex;align-items:center;justify-content:center;padding:0 22px;background:rgba(255,255,255,.03);color:rgba(255,255,255,.38);box-shadow:0 0 0 1px rgba(255,255,255,.08);}
 .forge-btn:hover{transform:scale(1.04);color:rgba(255,220,150,.7);box-shadow:0 0 0 1px rgba(255,200,100,.2);}
 .forge-btn:active{transform:scale(.96);}
@@ -107,6 +211,8 @@ html,body{width:100%;min-height:100%;background:#000;font-family:'Rajdhani',sans
 <div class="vignette"></div><div class="scan"></div><div id="toast"></div>
 
 <div class="page">
+
+  <!-- PAGE TITLE -->
   <div class="page-header">
     <div class="page-rune">⚔ ᛏᚺᛖ ᚨᚱᛏ ᚩᚠ ᚹᚨᚱ ⚔</div>
     <div class="page-title">📖 HOW TO PLAY</div>
@@ -114,57 +220,224 @@ html,body{width:100%;min-height:100%;background:#000;font-family:'Rajdhani',sans
     <div class="page-rule"></div>
   </div>
 
-  <div class="cards-grid">
-
-    <div class="how-card">
-      <div class="step-badge">01</div>
-      <span class="card-icon">❤️</span>
-      <div class="card-title">The Puzzle</div>
-      <p class="card-body">Each round shows a Heart pattern image. Find the missing number (0–9) and tap it!</p>
+  <!-- ════════ SECTION 1: BATTLE BASICS ════════ -->
+  <div class="section">
+    <div class="section-head s1 section-head">
+      <span class="section-head-icon">⚔</span>
+      <span class="section-title">Battle Basics</span>
+      <div class="section-rule"></div>
     </div>
-
-    <div class="how-card">
-      <div class="step-badge">02</div>
-      <span class="card-icon">🛡️</span>
-      <div class="card-title">Defend</div>
-      <p class="card-body">Press DEFEND and solve the puzzle to block all incoming enemy damage completely.</p>
+    <div class="cards-grid">
+      <div class="how-card card-anim s1">
+        <div class="step-badge">01</div>
+        <span class="card-icon" style="animation-delay:0s">❤️</span>
+        <div class="card-title">The Puzzle</div>
+        <p class="card-body">Each round displays a Heart pattern image. Your job is to find the missing number (0–9) hidden in the pattern and tap it before time runs out.</p>
+      </div>
+      <div class="how-card card-anim s2">
+        <div class="step-badge">02</div>
+        <span class="card-icon" style="animation-delay:.5s">⚔</span>
+        <div class="card-title">Attack Mode</div>
+        <p class="card-body">Default mode. Solve the puzzle correctly to deal damage to the enemy. The faster and more accurate you are, the more combos you build.</p>
+      </div>
+      <div class="how-card card-anim s3">
+        <div class="step-badge">03</div>
+        <span class="card-icon" style="animation-delay:1s">🛡️</span>
+        <div class="card-title">Defend Mode</div>
+        <p class="card-body">Press DEFEND before answering. Solve it correctly to completely block the enemy's next attack. A wrong answer while defending still hurts you!</p>
+      </div>
+      <div class="how-card card-anim s4">
+        <div class="step-badge">04</div>
+        <span class="card-icon" style="animation-delay:1.5s">⏱️</span>
+        <div class="card-title">The Timer</div>
+        <p class="card-body">Every puzzle has a countdown based on your chosen difficulty (10–30 seconds). If time runs out, it counts as a wrong answer and the enemy attacks!</p>
+      </div>
+      <div class="how-card card-anim s5">
+        <div class="step-badge">05</div>
+        <span class="card-icon" style="animation-delay:2s">💔</span>
+        <div class="card-title">Wrong Answer</div>
+        <p class="card-body">Incorrect answers reduce YOUR health. The enemy also counter-attacks every round regardless. Stay sharp — mistakes are costly!</p>
+      </div>
+      <div class="how-card card-anim s6">
+        <div class="step-badge">06</div>
+        <span class="card-icon" style="animation-delay:2.5s">🏆</span>
+        <div class="card-title">Win Condition</div>
+        <p class="card-body">Reduce the enemy's HP to 0 before your own HP hits 0. Earn coins after every battle based on your accuracy, combo, and HP remaining.</p>
+      </div>
     </div>
+  </div>
 
-    <div class="how-card">
-      <div class="step-badge">03</div>
-      <span class="card-icon">⏱️</span>
-      <div class="card-title">Timer</div>
-      <p class="card-body">Each puzzle has a time limit. Running out of time counts as a wrong answer!</p>
+  <!-- ════════ SECTION 2: GAME FLOW ════════ -->
+  <div class="section">
+    <div class="section-head s2 section-head" style="animation-delay:.3s">
+      <span class="section-head-icon">🗺</span>
+      <span class="section-title">Game Flow</span>
+      <div class="section-rule"></div>
     </div>
-
-    <div class="how-card">
-      <div class="step-badge">04</div>
-      <span class="card-icon">💔</span>
-      <div class="card-title">Wrong Answer</div>
-      <p class="card-body">Incorrect answers reduce YOUR health. Think carefully before answering!</p>
+    <div class="flow-row">
+      <div class="flow-step" style="animation-delay:.35s"><span class="flow-icon">🔐</span><div class="flow-label">LOGIN</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="animation-delay:.46s"><span class="flow-icon">⚔</span><div class="flow-label">PICK WARRIOR</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="animation-delay:.57s"><span class="flow-icon">💀</span><div class="flow-label">DIFFICULTY</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="animation-delay:.68s"><span class="flow-icon">🏪</span><div class="flow-label">SHOP</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="animation-delay:.79s"><span class="flow-icon">🔥</span><div class="flow-label">BATTLE</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="animation-delay:.9s"><span class="flow-icon">🏆</span><div class="flow-label">RESULT</div></div>
     </div>
+  </div>
 
-    <div class="how-card">
-      <div class="step-badge">05</div>
-      <span class="card-icon">👹</span>
-      <div class="card-title">Enemy AI</div>
-      <p class="card-body">The enemy counter-attacks each round. Defend correctly to avoid taking damage.</p>
+  <!-- ════════ SECTION 3: WARRIORS ════════ -->
+  <div class="section">
+    <div class="section-head s3 section-head" style="animation-delay:.4s">
+      <span class="section-head-icon">🧙</span>
+      <span class="section-title">Choose Your Warrior</span>
+      <div class="section-rule"></div>
     </div>
+    <p style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:500;color:rgba(255,255,255,.85);line-height:1.6;margin-bottom:16px;max-width:700px;">
+      Before each battle you choose a warrior. Each warrior has unique stats and a special passive ability that activates automatically during combat. Pick the one that matches your playstyle!
+    </p>
+    <div class="warrior-grid">
 
-    <div class="how-card">
-      <div class="step-badge">06</div>
-      <span class="card-icon">🏆</span>
-      <div class="card-title">Win Condition</div>
-      <p class="card-body">Reduce enemy HP to 0. Don't let YOUR HP reach 0 first — glory awaits!</p>
+      <div class="w-card wc-mage w1">
+        <span class="w-emoji" style="animation-delay:0s">🧙</span>
+        <div class="w-name">MAGE</div>
+        <div class="w-class">SPELLCASTER</div>
+        <div class="w-stats">
+          <div class="w-stat-row"><span class="w-stat-lbl">ATK</span><div class="w-stat-track"><div class="w-stat-fill" data-w="90"></div></div></div>
+          <div class="w-stat-row"><span class="w-stat-lbl">DEF</span><div class="w-stat-track"><div class="w-stat-fill" data-w="40"></div></div></div>
+          <div class="w-stat-row"><span class="w-stat-lbl">SPD</span><div class="w-stat-track"><div class="w-stat-fill" data-w="70"></div></div></div>
+        </div>
+        <div class="w-ability">✨ <strong style="color:#cc88ff">Arcane Surge</strong> — answering 3+ in a row correctly deals <strong style="color:#cc88ff">3× damage</strong> on the next hit.</div>
+      </div>
+
+      <div class="w-card wc-knight w2">
+        <span class="w-emoji" style="animation-delay:.6s">🛡️</span>
+        <div class="w-name">KNIGHT</div>
+        <div class="w-class">TANK</div>
+        <div class="w-stats">
+          <div class="w-stat-row"><span class="w-stat-lbl">ATK</span><div class="w-stat-track"><div class="w-stat-fill" data-w="60"></div></div></div>
+          <div class="w-stat-row"><span class="w-stat-lbl">DEF</span><div class="w-stat-track"><div class="w-stat-fill" data-w="95"></div></div></div>
+          <div class="w-stat-row"><span class="w-stat-lbl">SPD</span><div class="w-stat-track"><div class="w-stat-fill" data-w="45"></div></div></div>
+        </div>
+        <div class="w-ability">🛡 <strong style="color:#88bbff">Iron Will</strong> — starts with <strong style="color:#88bbff">35 HP</strong> instead of the normal 25. Built to last.</div>
+      </div>
+
+      <div class="w-card wc-archer w3">
+        <span class="w-emoji" style="animation-delay:1.2s">🏹</span>
+        <div class="w-name">ARCHER</div>
+        <div class="w-class">RANGER</div>
+        <div class="w-stats">
+          <div class="w-stat-row"><span class="w-stat-lbl">ATK</span><div class="w-stat-track"><div class="w-stat-fill" data-w="75"></div></div></div>
+          <div class="w-stat-row"><span class="w-stat-lbl">DEF</span><div class="w-stat-track"><div class="w-stat-fill" data-w="55"></div></div></div>
+          <div class="w-stat-row"><span class="w-stat-lbl">SPD</span><div class="w-stat-track"><div class="w-stat-fill" data-w="95"></div></div></div>
+        </div>
+        <div class="w-ability">⚡ <strong style="color:#88ffbb">Swift Shot</strong> — every correct answer adds <strong style="color:#88ffbb">+5 seconds</strong> to the timer. Never run out of time!</div>
+      </div>
+
+      <div class="w-card wc-ninja w4">
+        <span class="w-emoji" style="animation-delay:1.8s">🥷</span>
+        <div class="w-name">NINJA</div>
+        <div class="w-class">ASSASSIN</div>
+        <div class="w-stats">
+          <div class="w-stat-row"><span class="w-stat-lbl">ATK</span><div class="w-stat-track"><div class="w-stat-fill" data-w="80"></div></div></div>
+          <div class="w-stat-row"><span class="w-stat-lbl">DEF</span><div class="w-stat-track"><div class="w-stat-fill" data-w="35"></div></div></div>
+          <div class="w-stat-row"><span class="w-stat-lbl">SPD</span><div class="w-stat-track"><div class="w-stat-fill" data-w="90"></div></div></div>
+        </div>
+        <div class="w-ability">🌑 <strong style="color:#cccccc">Shadow Dodge</strong> — has a <strong style="color:#cccccc">30% chance</strong> to automatically evade an enemy attack each round.</div>
+      </div>
+
+      <div class="w-card wc-berserker w5">
+        <span class="w-emoji" style="animation-delay:2.4s">🪓</span>
+        <div class="w-name">BERSERKER</div>
+        <div class="w-class">RAGE FIGHTER</div>
+        <div class="w-stats">
+          <div class="w-stat-row"><span class="w-stat-lbl">ATK</span><div class="w-stat-track"><div class="w-stat-fill" data-w="100"></div></div></div>
+          <div class="w-stat-row"><span class="w-stat-lbl">DEF</span><div class="w-stat-track"><div class="w-stat-fill" data-w="25"></div></div></div>
+          <div class="w-stat-row"><span class="w-stat-lbl">SPD</span><div class="w-stat-track"><div class="w-stat-fill" data-w="60"></div></div></div>
+        </div>
+        <div class="w-ability">🔥 <strong style="color:#ff8844">Blood Rage</strong> — when HP drops to 10 or below, all damage dealt is <strong style="color:#ff8844">doubled</strong>. High risk, high reward!</div>
+      </div>
+
     </div>
+  </div>
 
+  <!-- ════════ SECTION 4: POWER-UP SHOP ════════ -->
+  <div class="section">
+    <div class="section-head s4 section-head" style="animation-delay:.5s">
+      <span class="section-head-icon">🏪</span>
+      <span class="section-title">The Power-Up Shop</span>
+      <div class="section-rule"></div>
+    </div>
+    <p style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:500;color:rgba(255,255,255,.85);line-height:1.6;margin-bottom:16px;max-width:700px;">
+      Earn 🪙 coins after each battle and spend them in the Forge Shop before battle begins. Power-ups are consumed when activated during combat — use them wisely!
+    </p>
+    <div class="powerup-grid">
+
+      <div class="pu-card pu-shield p1">
+        <span class="pu-emoji" style="animation-delay:0s">🛡</span>
+        <div class="pu-name">IRON SHIELD</div>
+        <div class="pu-cost">🪙 30 COINS</div>
+        <div class="pu-desc">Grants a one-time full block. The next enemy attack that would damage you is completely absorbed — no HP loss at all.</div>
+        <div class="pu-effect">USE WHEN: low HP · facing hard difficulty</div>
+      </div>
+
+      <div class="pu-card pu-rage p2">
+        <span class="pu-emoji" style="animation-delay:.7s">🔥</span>
+        <div class="pu-name">BATTLE RAGE</div>
+        <div class="pu-cost">🪙 40 COINS</div>
+        <div class="pu-desc">Activates a rage buff that doubles your attack damage for the next correct answer. Perfect for finishing off a weakened enemy fast.</div>
+        <div class="pu-effect">USE WHEN: enemy near 0 HP · combo active</div>
+      </div>
+
+      <div class="pu-card pu-heal p3">
+        <span class="pu-emoji" style="animation-delay:1.4s">💚</span>
+        <div class="pu-name">HEALING POTION</div>
+        <div class="pu-cost">🪙 25 COINS</div>
+        <div class="pu-desc">Instantly restores 5 HP mid-battle. Simple but crucial when you're clinging to survival. Works on any warrior including the Knight.</div>
+        <div class="pu-effect">USE WHEN: HP is critically low · any time</div>
+      </div>
+
+      <div class="pu-card pu-freeze p4">
+        <span class="pu-emoji" style="animation-delay:2.1s">❄️</span>
+        <div class="pu-name">FROST BIND</div>
+        <div class="pu-cost">🪙 35 COINS</div>
+        <div class="pu-desc">Freezes the enemy for one round, preventing their counter-attack entirely. Gives you a free damage turn with zero retaliation risk.</div>
+        <div class="pu-effect">USE WHEN: attack mode · securing kill</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════ SECTION 5: PRO TIPS ════════ -->
+  <div class="section">
+    <div class="section-head s5 section-head" style="animation-delay:.6s">
+      <span class="section-head-icon">💡</span>
+      <span class="section-title">Pro Tips</span>
+      <div class="section-rule"></div>
+    </div>
+    <div class="tips-box">
+      <div class="tips-title">⚔ FORGE WISDOM ⚔</div>
+      <div class="tips-list">
+        <div class="tip-item"><span class="tip-icon">🎯</span><span>Use keyboard shortcuts — press <strong style="color:#ffcc88">0–9</strong> to answer, <strong style="color:#ffcc88">A</strong> to attack, <strong style="color:#ffcc88">D</strong> to defend. Much faster than clicking!</span></div>
+        <div class="tip-item"><span class="tip-icon">🔥</span><span>Mage is best for aggressive players — land 3 correct answers in a row and your 4th hit deals 3× damage.</span></div>
+        <div class="tip-item"><span class="tip-icon">🛡</span><span>On Hard difficulty, Knight + Iron Shield is the safest combo. 35 HP + 1 free block can save your life.</span></div>
+        <div class="tip-item"><span class="tip-icon">⚡</span><span>Archer + Hard difficulty is a fun challenge — Swift Shot keeps adding time, so you'll never feel rushed.</span></div>
+        <div class="tip-item"><span class="tip-icon">🌑</span><span>Ninja's dodge is completely passive — no input needed. Great for players who struggle with defend timing.</span></div>
+        <div class="tip-item"><span class="tip-icon">💀</span><span>Berserker is high-risk, high-reward. Play aggressively, let your HP drop low, then unleash 2× damage to close out.</span></div>
+        <div class="tip-item"><span class="tip-icon">💰</span><span>Coins are earned based on accuracy, max combo, and HP remaining — a perfect run earns far more than a sloppy win.</span></div>
+        <div class="tip-item"><span class="tip-icon">❄️</span><span>Frost Bind + Mage combo is devastating — freeze the enemy, then land a 3-combo Arcane Surge for massive damage.</span></div>
+      </div>
+    </div>
   </div>
 
   <div class="rune-row">⚔ &nbsp; ᚠᛟᚱᚷᛖᛞ ᛁᚾ ᚠᛁᚱᛖ &nbsp; ⚔</div>
-
   <div class="back-wrap">
     <button class="forge-btn" onclick="window.history.back()">← &nbsp; BACK</button>
   </div>
+
 </div>
 
 <script src="../shared/eventbus.js"></script>
@@ -180,6 +453,14 @@ var cur=document.getElementById('cursor');
 document.addEventListener('mousemove',function(e){cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';});
 document.addEventListener('mousedown',function(){cur.classList.add('cl');});
 document.addEventListener('mouseup',function(){cur.classList.remove('cl');});
+
+/* Animate stat bars */
+setTimeout(function(){
+  document.querySelectorAll('.w-stat-fill').forEach(function(el){
+    el.style.width=el.getAttribute('data-w')+'%';
+  });
+},700);
+
 (function(){var C=document.getElementById('bg-canvas'),ctx=C.getContext('2d'),W,H,pts=[],t=0;function resize(){W=C.width=innerWidth;H=C.height=innerHeight;}addEventListener('resize',resize);resize();for(var i=0;i<110;i++)pts.push({x:Math.random()*W,y:H+Math.random()*150,r:Math.random()*2.5+.4,vx:(Math.random()-.5)*.4,vy:-(Math.random()*1.2+.3),life:Math.random(),max:Math.random()*.65+.3,hue:Math.random()*25+5});function draw(){ctx.clearRect(0,0,W,H);t++;var bg=ctx.createRadialGradient(W/2,H*.85,0,W/2,H*.4,H*.9);bg.addColorStop(0,'rgba(70,18,0,.28)');bg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);pts.forEach(function(p){p.life+=.011;if(p.life>p.max){p.y=H+20;p.x=Math.random()*W;p.life=0;p.max=Math.random()*.65+.3;}var pg=p.life/p.max,a=pg<.2?pg/.2:pg>.7?(1-pg)/.3:1;a*=.72;ctx.beginPath();ctx.arc(p.x,p.y,p.r*(1-pg*.5),0,Math.PI*2);ctx.fillStyle='hsla('+(p.hue+pg*15)+','+(85-pg*25)+'%,'+(65-pg*35)+'%,'+a+')';ctx.fill();p.x+=p.vx+Math.sin(t*.02+p.y*.01)*.3;p.y+=p.vy;});requestAnimationFrame(draw);}draw();})();
 (function(){var C=document.getElementById('ember-canvas'),ctx=C.getContext('2d'),W,H,em=[];function resize(){W=C.width=innerWidth;H=C.height=innerHeight;}addEventListener('resize',resize);resize();for(var i=0;i<40;i++)em.push({x:Math.random()*W,y:H+Math.random()*H,vx:(Math.random()-.5)*.7,vy:-(Math.random()*1.3+.4),r:Math.random()*2+.4,a:Math.random()*.4+.1,c:Math.random()>.5?'255,120,30':'255,200,60'});function draw(){ctx.clearRect(0,0,W,H);em.forEach(function(e){e.a-=.003;if(e.a<=0){e.x=Math.random()*W;e.y=H+10;e.a=.5+Math.random()*.4;}e.x+=e.vx;e.y+=e.vy;e.vx*=.985;ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,Math.PI*2);ctx.fillStyle='rgba('+e.c+','+e.a+')';ctx.fill();});requestAnimationFrame(draw);}draw();})();
 </script>
