@@ -41,15 +41,11 @@ if (typeof BattleEngine !== 'undefined') BattleEngine.init();
     'cursor:pointer', 'transition:all .2s'
   ].join(';');
 
-  // Hover plays a subtle SFX
   btn.addEventListener('mouseenter', () => EventBus.emit('sfx:play', { name: 'hover' }));
-
-  // Click toggles sound via EventBus (low coupling — button never calls SFX directly)
   btn.addEventListener('click', () => EventBus.emit('sfx:toggle'));
 
   document.body.appendChild(btn);
 
-  // React to sfx:toggled event emitted by SFX module
   EventBus.on('sfx:toggled', ({ enabled }) => {
     btn.innerHTML     = enabled ? '🔊' : '🔇';
     btn.style.opacity = enabled ? '1'  : '0.4';
@@ -57,17 +53,24 @@ if (typeof BattleEngine !== 'undefined') BattleEngine.init();
 })();
 
 // ── M key shortcut to mute/unmute ────────────────────
+// ✅ FIX: Skip when user is typing in any input/textarea/select
+//    — otherwise typing "m" or "M" in a form field mutes the BGM.
 document.addEventListener('keydown', e => {
-  if (e.key === 'm' || e.key === 'M') EventBus.emit('sfx:toggle');
+  if (e.key !== 'm' && e.key !== 'M') return;
+  const tag = document.activeElement && document.activeElement.tagName;
+  const isEditable = document.activeElement && document.activeElement.isContentEditable;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || isEditable) return;
+  EventBus.emit('sfx:toggle');
 });
 
 // ── First user click: unlock Web Audio + start BGM ───
-// Browsers block audio until a user gesture has occurred.
-// We listen for the very first click, start the music,
-// then remove the listener so it never fires again.
+// Pages that self-manage BGM set window.PW_SELF_BGM = true
+// before main.js loads to opt out of the global bgStart.
 document.addEventListener('click', function _unlockAudio() {
-  EventBus.emit('sfx:preload');   // warms up the AudioContext
-  EventBus.emit('sfx:bgStart');   // starts battle.mp3
+  EventBus.emit('sfx:preload');
+  if (!window.PW_SELF_BGM) {
+    EventBus.emit('sfx:bgStart');
+  }
   document.removeEventListener('click', _unlockAudio);
 }, { once: true });
 

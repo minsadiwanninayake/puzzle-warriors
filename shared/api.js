@@ -16,8 +16,15 @@ const API = (function () {
   }
 
   return {
-    login(u, p)         { return req('POST', '/api/auth/login',    { username:u, password:p }); },
-    register(u, e, p)   { return req('POST', '/api/auth/register', { username:u, email:e, password:p }); },
+    login(u, p)              { return req('POST', '/api/auth/login',    { username:u, password:p }); },
+    register(u, e, p, country, countryCode, region) {
+      return req('POST', '/api/auth/register', {
+        username: u, email: e, password: p,
+        country:     country     || '',
+        countryCode: countryCode || '',
+        region:      region      || '',
+      });
+    },
     getMe()             { return req('GET',  '/api/auth/me'); },
     getPuzzle()         { return req('GET',  '/api/game/puzzle'); },
     postResult(payload) { return req('POST', '/api/game/result', payload); },

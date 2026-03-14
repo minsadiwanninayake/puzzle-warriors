@@ -11,6 +11,13 @@ const SFX = (function () {
   let bgAudio     = null;
   let bgStarted   = false;
 
+  // ✅ FIX: Debounce guard — prevents toggle firing more than once
+  //    per 500 ms. This stops accidental double-emits of 'sfx:toggle'
+  //    (e.g. from a button click bubbling into a document listener)
+  //    from muting/unmuting the BGM on the same interaction.
+  let _lastToggleTime = 0;
+  const TOGGLE_DEBOUNCE_MS = 500;
+
   // ── Web Audio Context (lazy, resumes on use) ──────────
 
   function ensureCtx() {
@@ -123,9 +130,17 @@ const SFX = (function () {
   }
 
   // ── Toggle all sound on/off ───────────────────────────
-  // Emits 'sfx:toggled' so the UI button can update itself
+  // ✅ FIX: Debounced — ignores calls within TOGGLE_DEBOUNCE_MS of
+  //    the last real toggle. This is the core fix for the mute bug.
 
   function toggle() {
+    const now = Date.now();
+    if (now - _lastToggleTime < TOGGLE_DEBOUNCE_MS) {
+      console.warn('[SFX] toggle() debounced — called too soon after last toggle, ignoring.');
+      return;
+    }
+    _lastToggleTime = now;
+
     sfxEnabled = !sfxEnabled;
     if (!sfxEnabled) {
       if (bgAudio) bgAudio.pause();
@@ -136,13 +151,16 @@ const SFX = (function () {
     EventBus.emit('sfx:toggled', { enabled: sfxEnabled });
   }
 
+  // ── Public API: expose sfxEnabled state ──────────────
+  function isMuted() { return !sfxEnabled; }
+
   // ── Subscribe to EventBus events (called once on boot) ─
 
   function init() {
     if (initialized) return;
     initialized = true;
     EventBus.on('sfx:play',    d  => play(d.name));
-    EventBus.on('sfx:toggle',  () => toggle());
+    EventBus.on('sfx:toggle',  () => toggle());   // debounce inside toggle()
     EventBus.on('sfx:preload', () => play('preload'));
     EventBus.on('sfx:bgStart', () => startBackground());
     EventBus.on('sfx:bgStop',  () => stopBackground());
@@ -150,6 +168,6 @@ const SFX = (function () {
 
   // ── Public API ────────────────────────────────────────
 
-  return { init, play, toggle, startBackground, stopBackground };
+  return { init, play, toggle, startBackground, stopBackground, isMuted };
 
 })();
