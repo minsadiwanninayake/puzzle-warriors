@@ -184,6 +184,18 @@ document.addEventListener('mouseup',function(){cur.classList.remove('cl');});
   if(isDaily) document.getElementById('page-title').textContent='🏅 Daily Challenge';
 })();
 
+// ── Battle BGM ─────────────────────────────────────────────────────
+var _bgm = new Audio('../shared/battle.mp3');
+_bgm.loop   = true;
+_bgm.volume = 0.35;
+_bgm.play().catch(function(){});
+window.addEventListener('beforeunload', function(){ _bgm.pause(); });
+
+// Sync with the SFX mute button
+EventBus.on('sfx:toggled', function(d){
+  _bgm.muted = !d.enabled;
+});
+
 function burst(card){
   var rect=card.getBoundingClientRect(),cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
   var cols=['#ffcc00','#ff8800','#ff4400','#ffee88','#ffffff'];
@@ -202,7 +214,7 @@ function chooseDifficulty(d,card){
   burst(card);
   EventBus.emit('sfx:play',{name:'click'});
   sessionStorage.setItem('pw_difficulty',d);
-  setTimeout(function(){window.location.href='shop.html';},420);
+  setTimeout(function(){_bgm.pause();window.location.href='shop.html';},420);
 }
 
 /* fire bg */

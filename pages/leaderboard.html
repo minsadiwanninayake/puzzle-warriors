@@ -128,6 +128,37 @@ var cur=document.getElementById('cursor');
 document.addEventListener('mousemove',function(e){cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';});
 document.addEventListener('mousedown',function(){cur.classList.add('cl');});
 document.addEventListener('mouseup',function(){cur.classList.remove('cl');});
+
+// ── Battle BGM + Mute Button sync ─────────────────────────────────
+var _bgm = new Audio('../shared/battle.mp3');
+_bgm.loop   = true;
+_bgm.volume = 0.35;
+_bgm.play().catch(function(){});
+window.addEventListener('beforeunload', function(){ _bgm.pause(); });
+
+// Mute button: find it once it exists, then keep _bgm in sync
+function _syncMuteBtn() {
+  var btn = document.getElementById('mute-btn');
+  if (!btn) {
+    // Button not created yet — wait a tick and retry
+    setTimeout(_syncMuteBtn, 100);
+    return;
+  }
+  // Override the button's onclick to also mute _bgm
+  var _origClick = btn.onclick;
+  btn.onclick = function() {
+    if (_origClick) _origClick.call(btn);
+    // sfx:toggled will fire after this — handled below
+  };
+}
+_syncMuteBtn();
+
+// This fires every time the mute button is clicked
+EventBus.on('sfx:toggled', function(d) {
+  _bgm.muted = !d.enabled;
+});
+
+
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 async function loadLeaderboard(){
   var tbody=document.getElementById('lb-body');
@@ -141,12 +172,7 @@ async function loadLeaderboard(){
       var isMe=me&&u.username===me.username;
       var rnk=i<3?'<span class="rank-'+(i+1)+'">'+medals[i]+'</span>':'<span class="rank-num">#'+(i+1)+'</span>';
       var tc=i<3?topCls[i]:'';
-      return '<tr class="lb-row '+(isMe?'is-me ':'')+tc+'" style="animation-delay:'+(i*.07+.7)+'s">'+
-        '<td class="lb-rank">'+rnk+'</td>'+
-        '<td class="name-cell">'+esc(u.username)+(isMe?'<span class="you-tag">YOU</span>':'')+'</td>'+
-        '<td class="wins-cell">'+(u.wins||0)+'</td>'+
-        '<td class="losses-cell">'+(u.losses||0)+'</td>'+
-        '</tr>';
+      return '<tr class="lb-row '+(isMe?'is-me ':'')+tc+'" style="animation-delay:'+(i*.07+.7)+'s"><td class="lb-rank">'+rnk+'</td><td class="name-cell">'+esc(u.username)+(isMe?'<span class="you-tag">YOU</span>':'')+'</td><td class="wins-cell">'+(u.wins||0)+'</td><td class="losses-cell">'+(u.losses||0)+'</td></tr>';
     }).join('');
     setTimeout(function(){document.querySelectorAll('.lb-row').forEach(function(r){r.classList.add('animate');});},50);
   }catch(e){tbody.innerHTML='<tr><td colspan="4"><div class="lb-empty lb-error">⚠ SERVER OFFLINE</div></td></tr>';}

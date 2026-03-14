@@ -71,8 +71,6 @@ html,body{width:100%;min-height:100%;background:#000;font-family:'Rajdhani',sans
 .warrior-card:nth-child(4) .warrior-emoji{animation-delay:1.8s;}
 .warrior-card:nth-child(5) .warrior-emoji{animation-delay:2.4s;}
 @keyframes iconFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-
-/* BRIGHTER + LARGER text */
 .warrior-name{font-family:'Uncial Antiqua',serif;font-size:16px;letter-spacing:2px;color:#ffe8aa;text-shadow:0 0 10px rgba(255,150,0,.35);margin-bottom:3px;}
 .warrior-class{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:rgba(255,220,150,.75);margin-bottom:12px;}
 .stat-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
@@ -205,6 +203,21 @@ document.addEventListener('mousemove',function(e){cur.style.left=e.clientX+'px';
 document.addEventListener('mousedown',function(){cur.classList.add('cl');});
 document.addEventListener('mouseup',function(){cur.classList.remove('cl');});
 setTimeout(function(){document.querySelectorAll('.stat-fill').forEach(function(el){el.style.width=el.getAttribute('data-w')+'%';});},600);
+
+// ── Battle BGM ──────────────────────────────────────────────────────
+var _bgm = new Audio('../shared/battle.mp3');
+_bgm.loop   = true;
+_bgm.volume = 0.35;
+_bgm.play().catch(function(){});
+window.addEventListener('beforeunload', function(){ _bgm.pause(); });
+
+// Sync mute by intercepting the sfx:toggle event BEFORE SFX handles it,
+// so we always mirror whatever state SFX is about to switch to.
+EventBus.on('sfx:toggle', function(){
+  // SFX.sfxEnabled is private; derive next state from current bgAudio muted state
+  _bgm.muted = !_bgm.muted;
+});
+
 var WARRIORS={
   mage:{emoji:'🧙',name:'Mage',ability:'✨ Arcane Surge: 3+ combo = 3× damage'},
   knight:{emoji:'🛡️',name:'Knight',ability:'🛡 Iron Will: starts with 35 HP'},
@@ -236,6 +249,7 @@ function selectWarrior(id){
 function confirmWarrior(){
   if(!State.getSelectedWarrior())return;
   EventBus.emit('sfx:play',{name:'click'});
+  _bgm.pause();
   window.location.href='difficulty.html';
 }
 (function(){var C=document.getElementById('bg-canvas'),ctx=C.getContext('2d'),W,H,pts=[],t=0;function resize(){W=C.width=innerWidth;H=C.height=innerHeight;}addEventListener('resize',resize);resize();for(var i=0;i<130;i++)pts.push({x:Math.random()*W,y:H+Math.random()*150,r:Math.random()*2.5+.4,vx:(Math.random()-.5)*.4,vy:-(Math.random()*1.2+.3),life:Math.random(),max:Math.random()*.65+.3,hue:Math.random()*25+5});function draw(){ctx.clearRect(0,0,W,H);t++;var bg=ctx.createRadialGradient(W/2,H*.85,0,W/2,H*.4,H*.9);bg.addColorStop(0,'rgba(70,18,0,.28)');bg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);pts.forEach(function(p){p.life+=.011;if(p.life>p.max){p.y=H+20;p.x=Math.random()*W;p.life=0;p.max=Math.random()*.65+.3;}var pg=p.life/p.max,a=pg<.2?pg/.2:pg>.7?(1-pg)/.3:1;a*=.72;ctx.beginPath();ctx.arc(p.x,p.y,p.r*(1-pg*.5),0,Math.PI*2);ctx.fillStyle='hsla('+(p.hue+pg*15)+','+(85-pg*25)+'%,'+(65-pg*35)+'%,'+a+')';ctx.fill();p.x+=p.vx+Math.sin(t*.02+p.y*.01)*.3;p.y+=p.vy;});requestAnimationFrame(draw);}draw();})();

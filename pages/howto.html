@@ -454,6 +454,18 @@ document.addEventListener('mousemove',function(e){cur.style.left=e.clientX+'px';
 document.addEventListener('mousedown',function(){cur.classList.add('cl');});
 document.addEventListener('mouseup',function(){cur.classList.remove('cl');});
 
+// ── Battle BGM ─────────────────────────────────────────────────────
+var _bgm = new Audio('../shared/battle.mp3');
+_bgm.loop   = true;
+_bgm.volume = 0.35;
+_bgm.play().catch(function(){});
+window.addEventListener('beforeunload', function(){ _bgm.pause(); });
+
+// Sync with the SFX mute button
+EventBus.on('sfx:toggled', function(d){
+  _bgm.muted = !d.enabled;
+});
+
 /* Animate stat bars */
 setTimeout(function(){
   document.querySelectorAll('.w-stat-fill').forEach(function(el){

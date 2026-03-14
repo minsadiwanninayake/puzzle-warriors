@@ -9,7 +9,8 @@
 <link rel="stylesheet" href="../shared/styles.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Rajdhani',sans-serif;cursor:none;}
+html,body{width:100%;min-height:100%;background:#000;font-family:'Rajdhani',sans-serif;cursor:none;}
+html{overflow-y:auto;}body{overflow-x:hidden;}
 
 .cursor{position:fixed;width:20px;height:20px;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);}
 .cursor-inner{width:6px;height:6px;background:#ff9a00;border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 0 10px #ff9a00;}
@@ -22,7 +23,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Ra
 .scan{position:fixed;inset:0;z-index:2;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 3px);}
 #ember-canvas{position:fixed;inset:0;z-index:3;pointer-events:none;}
 
-.auth-wrap{position:relative;z-index:10;display:flex;align-items:center;justify-content:center;height:100vh;padding:20px;}
+.auth-wrap{position:relative;z-index:10;display:flex;align-items:flex-start;justify-content:center;min-height:100vh;padding:40px 20px;overflow-y:auto;}
 
 .panel-outer{
   position:relative;width:100%;max-width:460px;
@@ -39,115 +40,103 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Ra
   background:linear-gradient(160deg,#100800 0%,#0a0500 40%,#0d0208 100%);
   border-radius:8px;padding:38px 34px;
   box-shadow:0 0 80px rgba(100,20,0,.4),0 0 160px rgba(60,10,0,.3),inset 0 0 60px rgba(80,15,0,.15);
+  overflow:visible;
 }
 
-/* Top crest */
-.crest{text-align:center;margin-bottom:6px;
-  opacity:0;animation:fadeUp .6s ease .5s forwards;}
+.crest{text-align:center;margin-bottom:6px;opacity:0;animation:fadeUp .6s ease .5s forwards;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
-
-.crest-icon{font-size:44px;display:block;margin-bottom:8px;
-  filter:drop-shadow(0 0 18px rgba(255,120,0,.9));
-  animation:iconBeat 2.5s ease-in-out infinite 1s;}
+.crest-icon{font-size:44px;display:block;margin-bottom:8px;filter:drop-shadow(0 0 18px rgba(255,120,0,.9));animation:iconBeat 2.5s ease-in-out infinite 1s;}
 @keyframes iconBeat{0%,100%{filter:drop-shadow(0 0 18px rgba(255,120,0,.9));transform:scale(1)}50%{filter:drop-shadow(0 0 35px rgba(255,200,0,1));transform:scale(1.07)}}
-
-.crest-title{
-  font-family:'Uncial Antiqua',serif;font-size:26px;letter-spacing:5px;
-  background:linear-gradient(180deg,#fff8e0 0%,#ffcc44 30%,#ff7700 70%,#aa3300 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  filter:drop-shadow(0 0 10px rgba(255,100,0,.5));
-}
-/* ── INCREASED: sub title visibility ── */
+.crest-title{font-family:'Uncial Antiqua',serif;font-size:26px;letter-spacing:5px;background:linear-gradient(180deg,#fff8e0 0%,#ffcc44 30%,#ff7700 70%,#aa3300 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 10px rgba(255,100,0,.5));}
 .crest-sub{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:5px;color:rgba(255,210,120,.65);margin-top:6px;}
 
-/* ── TABS ── */
 .tabs{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:24px 0 20px;
   background:rgba(0,0,0,.6);border:1px solid rgba(255,80,0,.15);
   clip-path:polygon(5px 0%,calc(100% - 5px) 0%,100% 5px,100% calc(100% - 5px),calc(100% - 5px) 100%,5px 100%,0% calc(100% - 5px),0% 5px);
   padding:4px;}
-/* ── INCREASED: tab font size + brighter inactive ── */
 .tab{padding:13px;border:none;font-family:'Cinzel',serif;font-weight:700;font-size:14px;letter-spacing:4px;cursor:pointer;transition:all .2s;background:transparent;color:rgba(255,210,150,.45);text-transform:uppercase;
   clip-path:polygon(4px 0%,calc(100% - 4px) 0%,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0% calc(100% - 4px),0% 4px);}
 .tab.active{background:linear-gradient(135deg,rgba(120,30,0,.7),rgba(60,10,0,.9));color:#ffe8aa;box-shadow:0 0 20px rgba(200,60,0,.3),inset 0 1px 0 rgba(255,150,50,.15);}
 .tab:hover:not(.active){color:rgba(255,220,140,.7);}
 
-/* Error */
-.auth-error{display:none;margin-bottom:14px;
-  background:rgba(120,0,0,.25);border:1px solid rgba(255,50,50,.3);
-  padding:10px 14px;font-family:'Share Tech Mono',monospace;font-size:12px;color:#ff9999;
-  clip-path:polygon(4px 0%,calc(100% - 4px) 0%,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0% calc(100% - 4px),0% 4px);
-  animation:errShake .4s ease;}
+.auth-error{display:none;margin-bottom:14px;background:rgba(120,0,0,.25);border:1px solid rgba(255,50,50,.3);padding:10px 14px;font-family:'Share Tech Mono',monospace;font-size:12px;color:#ff9999;
+  clip-path:polygon(4px 0%,calc(100% - 4px) 0%,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0% calc(100% - 4px),0% 4px);animation:errShake .4s ease;}
 @keyframes errShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 
-/* Fields */
 .field{margin-bottom:18px;opacity:0;animation:fadeUp .5s ease forwards;}
-.field:nth-child(1){animation-delay:.62s}.field:nth-child(2){animation-delay:.74s}.field:nth-child(3){animation-delay:.86s}
-
-/* ── INCREASED: label font size + much brighter ── */
+.field:nth-child(1){animation-delay:.62s}.field:nth-child(2){animation-delay:.74s}.field:nth-child(3){animation-delay:.86s}.field:nth-child(4){animation-delay:.96s}
 .field label{display:block;margin-bottom:8px;font-family:'Cinzel',serif;font-size:12px;font-weight:700;letter-spacing:4px;color:rgba(255,210,130,.8);text-transform:uppercase;}
+.field input{width:100%;height:52px;background:rgba(0,0,0,.6);border:none;border-bottom:2px solid rgba(255,100,0,.4);padding:0 16px;font-family:'Cinzel',serif;font-size:17px;font-weight:700;color:#ffe8c0;outline:none;transition:all .25s;caret-color:#ff9a00;}
+.field input::placeholder{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:500;color:rgba(255,200,120,.3);}
+.field input:focus{border-bottom-color:rgba(255,160,0,.9);background:rgba(80,20,0,.3);box-shadow:0 4px 20px rgba(255,80,0,.12),inset 0 -2px 0 rgba(255,140,0,.5);color:#fff8e8;}
 
-/* ── INCREASED: input font size + brighter text ── */
-.field input{
+/* ── COUNTRY SELECTOR ── */
+.country-wrap{position:relative;}
+.country-search-box{
   width:100%;height:52px;
   background:rgba(0,0,0,.6);
-  border:none;
-  border-bottom:2px solid rgba(255,100,0,.4);
-  padding:0 16px;
-  font-family:'Cinzel',serif;font-size:17px;font-weight:700;color:#ffe8c0;
-  outline:none;transition:all .25s;
-  caret-color:#ff9a00;
+  border:none;border-bottom:2px solid rgba(255,100,0,.4);
+  padding:0 16px 0 44px;
+  font-family:'Cinzel',serif;font-size:15px;font-weight:700;color:#ffe8c0;
+  outline:none;transition:all .25s;caret-color:#ff9a00;cursor:pointer;
 }
-.field input::placeholder{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:500;color:rgba(255,200,120,.3);}
-.field input:focus{
-  border-bottom-color:rgba(255,160,0,.9);
-  background:rgba(80,20,0,.3);
-  box-shadow:0 4px 20px rgba(255,80,0,.12),inset 0 -2px 0 rgba(255,140,0,.5);
-  color:#fff8e8;
+.country-search-box:focus{border-bottom-color:rgba(255,160,0,.9);background:rgba(80,20,0,.3);}
+.country-flag-preview{
+  position:absolute;left:14px;top:14px;
+  font-size:22px;pointer-events:none;line-height:1;z-index:2;
 }
+/* Dropdown — simple relative, pushes content down */
+.country-dropdown{
+  width:100%;
+  background:#0d0500;border:1px solid rgba(255,100,0,.35);
+  border-top:none;border-radius:0 0 6px 6px;
+  max-height:200px;overflow-y:auto;
+  box-shadow:0 8px 30px rgba(0,0,0,.9);
+  display:none;
+}
+.country-dropdown.open{display:block;}
+.country-opt{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;cursor:pointer;
+  font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;
+  color:rgba(255,220,160,.8);transition:background .15s;border-bottom:1px solid rgba(255,80,0,.08);
+}
+.country-opt:hover,.country-opt.highlighted{background:rgba(255,80,0,.12);color:#ffe8aa;}
+.country-opt .cf{font-size:20px;line-height:1;flex-shrink:0;}
+.country-opt .cn{flex:1;}
+.country-opt .cc{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,180,80,.4);}
+/* Scrollbar styling */
+.country-dropdown::-webkit-scrollbar{width:4px;}
+.country-dropdown::-webkit-scrollbar-track{background:rgba(0,0,0,.3);}
+.country-dropdown::-webkit-scrollbar-thumb{background:rgba(255,100,0,.4);border-radius:2px;}
 
-/* password hint */
+/* Country loading state */
+.country-loading{padding:14px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(255,180,80,.5);letter-spacing:2px;animation:loadPulse 1.2s ease infinite;}
+@keyframes loadPulse{0%,100%{opacity:.4}50%{opacity:1}}
+
 .pass-hint{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,200,120,.45);letter-spacing:1px;}
 
-/* Submit */
-.btn-submit{
-  width:100%;height:56px;margin-top:14px;border:none;cursor:pointer;
-  font-family:'Cinzel',serif;font-weight:700;font-size:15px;letter-spacing:5px;text-transform:uppercase;
-  position:relative;overflow:hidden;transition:transform .12s,filter .15s;
+.btn-submit{width:100%;height:56px;margin-top:14px;border:none;cursor:pointer;font-family:'Cinzel',serif;font-weight:700;font-size:15px;letter-spacing:5px;text-transform:uppercase;position:relative;overflow:hidden;transition:transform .12s,filter .15s;
   clip-path:polygon(8px 0%,calc(100% - 8px) 0%,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0% calc(100% - 8px),0% 8px);
-  opacity:0;animation:fadeUp .5s ease .96s forwards;
-}
+  opacity:0;animation:fadeUp .5s ease .96s forwards;}
 .btn-submit:hover{transform:scale(1.02);filter:brightness(1.2);}
 .btn-submit:active{transform:scale(.97);}
-
-.btn-login-s{background:linear-gradient(135deg,#2a0800,#6a1800,#2a0800);background-size:200%;color:#ffe8aa;
-  box-shadow:0 0 0 1px rgba(200,60,0,.5),0 0 30px rgba(180,40,0,.3);
-  animation:fadeUp .5s ease .96s forwards,bgShift 4s ease infinite;}
+.btn-login-s{background:linear-gradient(135deg,#2a0800,#6a1800,#2a0800);background-size:200%;color:#ffe8aa;box-shadow:0 0 0 1px rgba(200,60,0,.5),0 0 30px rgba(180,40,0,.3);animation:fadeUp .5s ease .96s forwards,bgShift 4s ease infinite;}
 @keyframes bgShift{0%,100%{background-position:0%}50%{background-position:100%}}
-
-.btn-register-s{background:linear-gradient(135deg,#001a0a,#004020,#001a0a);background-size:200%;color:#aaffdd;
-  box-shadow:0 0 0 1px rgba(0,150,80,.4),0 0 30px rgba(0,120,60,.2);}
-
+.btn-register-s{background:linear-gradient(135deg,#001a0a,#004020,#001a0a);background-size:200%;color:#aaffdd;box-shadow:0 0 0 1px rgba(0,150,80,.4),0 0 30px rgba(0,120,60,.2);}
 .btn-submit .sweep{position:absolute;top:0;left:-100%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);animation:swp 3s ease infinite 2.5s;}
 @keyframes swp{0%{left:-100%}50%,100%{left:150%}}
-
 .btn-submit::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#ffaa00,#ff6600,#ffaa00,transparent);animation:fireTop 2.5s ease infinite;}
 @keyframes fireTop{0%{opacity:0;transform:scaleX(.3)}40%{opacity:1}100%{opacity:0;transform:scaleX(1.2)}}
 
-/* Back */
-.btn-back{width:100%;height:46px;margin-top:12px;background:transparent;
-  border:1px solid rgba(255,255,255,.12);
-  font-family:'Cinzel',serif;font-weight:600;font-size:12px;letter-spacing:3px;
-  color:rgba(255,220,160,.5);cursor:pointer;transition:all .2s;text-transform:uppercase;
+.btn-back{width:100%;height:46px;margin-top:12px;background:transparent;border:1px solid rgba(255,255,255,.12);font-family:'Cinzel',serif;font-weight:600;font-size:12px;letter-spacing:3px;color:rgba(255,220,160,.5);cursor:pointer;transition:all .2s;text-transform:uppercase;
   clip-path:polygon(4px 0%,calc(100% - 4px) 0%,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0% calc(100% - 4px),0% 4px);}
 .btn-back:hover{border-color:rgba(255,150,50,.35);color:rgba(255,210,120,.8);}
 
 .fire-border-path{stroke-dasharray:1800;stroke-dashoffset:1800;animation:borderDraw 2s ease .3s forwards;}
 @keyframes borderDraw{to{stroke-dashoffset:0;}}
 
-#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;
-  background:rgba(10,3,0,.95);border:1px solid rgba(255,100,0,.4);padding:10px 24px;
-  font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:3px;color:#ffcc88;
-  opacity:0;transition:opacity .3s;pointer-events:none;
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(10,3,0,.95);border:1px solid rgba(255,100,0,.4);padding:10px 24px;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:3px;color:#ffcc88;opacity:0;transition:opacity .3s;pointer-events:none;
   clip-path:polygon(6px 0%,calc(100% - 6px) 0%,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0% calc(100% - 6px),0% 6px);}
 #toast.show{opacity:1;}
 </style>
@@ -162,9 +151,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Ra
 
 <div class="auth-wrap">
   <div class="panel-outer">
-
     <div class="panel-border">
-      <svg viewBox="0 0 460 560" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 460 600" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="fb" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%"   stop-color="#ff8800"><animate attributeName="stop-color" values="#ff8800;#ffcc00;#ff4400;#ff8800" dur="3s" repeatCount="indefinite"/></stop>
@@ -173,12 +161,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Ra
           </linearGradient>
           <filter id="fireGlow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         </defs>
-        <path class="fire-border-path" d="M20,2 L440,2 L458,20 L458,540 L440,558 L20,558 L2,540 L2,20 Z"
+        <path class="fire-border-path" d="M20,2 L440,2 L458,20 L458,580 L440,598 L20,598 L2,580 L2,20 Z"
           fill="none" stroke="url(#fb)" stroke-width="1.5" filter="url(#fireGlow)" opacity="0.8"/>
         <path d="M2,20 L2,2 L20,2" fill="none" stroke="#ffaa00" stroke-width="2" opacity="0.9"/>
         <path d="M440,2 L458,2 L458,20" fill="none" stroke="#ffaa00" stroke-width="2" opacity="0.9"/>
-        <path d="M458,540 L458,558 L440,558" fill="none" stroke="#ffaa00" stroke-width="2" opacity="0.9"/>
-        <path d="M20,558 L2,558 L2,540" fill="none" stroke="#ffaa00" stroke-width="2" opacity="0.9"/>
+        <path d="M458,580 L458,598 L440,598" fill="none" stroke="#ffaa00" stroke-width="2" opacity="0.9"/>
+        <path d="M20,598 L2,598 L2,580" fill="none" stroke="#ffaa00" stroke-width="2" opacity="0.9"/>
       </svg>
     </div>
 
@@ -196,6 +184,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Ra
 
       <div id="auth-error" class="auth-error"></div>
 
+      <!-- ── LOGIN FORM ── -->
       <div id="form-login">
         <div class="field">
           <label>Username</label>
@@ -211,6 +200,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Ra
         </button>
       </div>
 
+      <!-- ── REGISTER FORM ── -->
       <div id="form-register" style="display:none">
         <div class="field">
           <label>Username</label>
@@ -224,6 +214,28 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Ra
           <label>Password &nbsp;<span class="pass-hint">(min 6 chars)</span></label>
           <input type="password" id="reg-pass" placeholder="Create a password">
         </div>
+
+        <!-- ── COUNTRY / REGION FIELD ── -->
+        <div class="field">
+          <label>🌍 &nbsp;Country / Region</label>
+          <div class="country-wrap" id="country-wrap">
+            <span class="country-flag-preview" id="country-flag">🌐</span>
+            <input
+              class="country-search-box"
+              id="country-search"
+              placeholder="Search your country..."
+              autocomplete="off"
+              readonly
+            >
+            <div class="country-dropdown" id="country-dropdown">
+              <div class="country-loading" id="country-loading">LOADING COUNTRIES...</div>
+            </div>
+          </div>
+          <!-- Hidden value sent with form -->
+          <input type="hidden" id="reg-country" value="">
+          <input type="hidden" id="reg-country-code" value="">
+        </div>
+
         <button class="btn-submit btn-register-s" onclick="Auth.register()">
           <div class="sweep"></div>
           <span style="position:relative;z-index:1;">CREATE ACCOUNT →</span>
@@ -250,11 +262,29 @@ if(params.get('tab')==='register') Auth.switchTab('register');
 document.getElementById('login-pass').addEventListener('keydown',function(e){if(e.key==='Enter')Auth.login();});
 document.getElementById('login-user').addEventListener('keydown',function(e){if(e.key==='Enter')Auth.login();});
 
+// ── Cursor ──────────────────────────────────────────────────────────
 var cur=document.getElementById('cursor');
 document.addEventListener('mousemove',function(e){cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';});
 document.addEventListener('mousedown',function(){cur.classList.add('cl');});
 document.addEventListener('mouseup',function(){cur.classList.remove('cl');});
 
+// ── Battle BGM ─────────────────────────────────────────────────────
+var _bgm = new Audio('../shared/battle.mp3');
+_bgm.loop   = true;
+_bgm.volume = 0.35;
+_bgm.play().catch(function(){});
+window.addEventListener('beforeunload', function(){ _bgm.pause(); });
+
+// Sync with the SFX mute button
+EventBus.on('sfx:toggle', function(){
+  _bgm.muted = !_bgm.muted;
+});
+// If SFX was already muted before this page loaded, respect that
+if(typeof SFX !== 'undefined' && SFX.isMuted && SFX.isMuted()){
+  _bgm.muted = true;
+}
+
+// ── BG Fire Particles ───────────────────────────────────────────────
 (function(){
   var C=document.getElementById('bg-canvas'),ctx=C.getContext('2d'),W,H,pts=[],t=0;
   function resize(){W=C.width=innerWidth;H=C.height=innerHeight;}
@@ -276,6 +306,8 @@ document.addEventListener('mouseup',function(){cur.classList.remove('cl');});
   }
   draw();
 })();
+
+// ── Ember Particles ─────────────────────────────────────────────────
 (function(){
   var C=document.getElementById('ember-canvas'),ctx=C.getContext('2d'),W,H,em=[];
   function resize(){W=C.width=innerWidth;H=C.height=innerHeight;}
@@ -293,6 +325,195 @@ document.addEventListener('mouseup',function(){cur.classList.remove('cl');});
   }
   draw();
 })();
+
+// ═══════════════════════════════════════════════════════════════════
+// COUNTRY SELECTOR  — uses restcountries.com (free, no API key)
+// ═══════════════════════════════════════════════════════════════════
+var CountryPicker = (function(){
+  var allCountries = [];
+  var filtered     = [];
+  var selected     = null;
+  var highlightIdx = -1;
+  var isOpen       = false;
+
+  var searchEl  = document.getElementById('country-search');
+  var dropEl    = document.getElementById('country-dropdown');
+  var flagEl    = document.getElementById('country-flag');
+  var loadEl    = document.getElementById('country-loading');
+  var valEl     = document.getElementById('reg-country');
+  var codeEl    = document.getElementById('reg-country-code');
+
+  // Flag emoji from country code
+  function codeToFlag(code) {
+    if (!code || code.length !== 2) return '🌐';
+    return Array.from(code.toUpperCase())
+      .map(function(c){ return String.fromCodePoint(0x1F1E6 - 65 + c.charCodeAt(0)); })
+      .join('');
+  }
+
+  // Fetch countries from REST Countries API
+  function loadCountries() {
+    fetch('https://restcountries.com/v3.1/all?fields=name,cca2,region')
+      .then(function(r){ return r.json(); })
+      .then(function(data) {
+        allCountries = data
+          .map(function(c){ return { name: c.name.common, code: c.cca2, region: c.region }; })
+          .sort(function(a,b){ return a.name.localeCompare(b.name); });
+        loadEl.style.display = 'none';
+        console.log('[Country] Loaded ' + allCountries.length + ' countries');
+      })
+      .catch(function(e){
+        loadEl.textContent = '⚠ Could not load — type manually';
+        console.warn('[Country] API failed:', e);
+        // Fallback: common countries
+        allCountries = [
+          {name:'Sri Lanka',code:'LK',region:'Asia'},{name:'United States',code:'US',region:'Americas'},
+          {name:'United Kingdom',code:'GB',region:'Europe'},{name:'India',code:'IN',region:'Asia'},
+          {name:'Australia',code:'AU',region:'Oceania'},{name:'Canada',code:'CA',region:'Americas'},
+          {name:'Germany',code:'DE',region:'Europe'},{name:'France',code:'FR',region:'Europe'},
+          {name:'Japan',code:'JP',region:'Asia'},{name:'China',code:'CN',region:'Asia'},
+          {name:'Brazil',code:'BR',region:'Americas'},{name:'South Africa',code:'ZA',region:'Africa'},
+          {name:'Nigeria',code:'NG',region:'Africa'},{name:'Pakistan',code:'PK',region:'Asia'},
+          {name:'Bangladesh',code:'BD',region:'Asia'},{name:'Indonesia',code:'ID',region:'Asia'},
+          {name:'Philippines',code:'PH',region:'Asia'},{name:'Malaysia',code:'MY',region:'Asia'},
+          {name:'Singapore',code:'SG',region:'Asia'},{name:'UAE',code:'AE',region:'Asia'},
+        ];
+        loadEl.style.display = 'none';
+      });
+  }
+
+  function renderList(query) {
+    query = (query || '').toLowerCase().trim();
+    filtered = query
+      ? allCountries.filter(function(c){ return c.name.toLowerCase().includes(query) || c.code.toLowerCase().includes(query); })
+      : allCountries;
+
+    // Remove old options
+    Array.from(dropEl.querySelectorAll('.country-opt')).forEach(function(el){ el.remove(); });
+    highlightIdx = -1;
+
+    if (filtered.length === 0) {
+      var none = document.createElement('div');
+      none.className = 'country-opt';
+      none.style.color = 'rgba(255,150,80,.4)';
+      none.style.justifyContent = 'center';
+      none.textContent = 'No countries found';
+      dropEl.appendChild(none);
+      return;
+    }
+
+    var frag = document.createDocumentFragment();
+    filtered.slice(0, 80).forEach(function(c, i) {
+      var opt = document.createElement('div');
+      opt.className = 'country-opt';
+      opt.dataset.idx = i;
+      opt.innerHTML =
+        '<span class="cf">' + codeToFlag(c.code) + '</span>' +
+        '<span class="cn">' + c.name + '</span>' +
+        '<span class="cc">' + c.code + '</span>';
+      opt.addEventListener('mousedown', function(e){
+        e.preventDefault();
+        selectCountry(c);
+      });
+      frag.appendChild(opt);
+    });
+    dropEl.appendChild(frag);
+  }
+
+  function selectCountry(c) {
+    selected = c;
+    searchEl.value  = c.name;
+    flagEl.textContent = codeToFlag(c.code);
+    valEl.value  = c.name;
+    codeEl.value = c.code;
+    close();
+  }
+
+  function open() {
+    if (allCountries.length === 0) return;
+    isOpen = true;
+    searchEl.removeAttribute('readonly');
+    searchEl.value = '';
+    flagEl.textContent = selected ? codeToFlag(selected.code) : '🌐';
+    renderList('');
+    dropEl.classList.add('open');
+    searchEl.focus();
+    // Scroll panel so dropdown is visible
+    setTimeout(function(){
+      dropEl.scrollIntoView({block:'nearest', behavior:'smooth'});
+    }, 50);
+  }
+
+  function close() {
+    isOpen = false;
+    searchEl.setAttribute('readonly', true);
+    if (selected) searchEl.value = selected.name;
+    else searchEl.value = '';
+    dropEl.classList.remove('open');
+  }
+
+  function highlight(dir) {
+    var opts = dropEl.querySelectorAll('.country-opt');
+    if (!opts.length) return;
+    opts[highlightIdx] && opts[highlightIdx].classList.remove('highlighted');
+    highlightIdx = Math.max(0, Math.min(opts.length - 1, highlightIdx + dir));
+    var target = opts[highlightIdx];
+    target.classList.add('highlighted');
+    target.scrollIntoView({ block: 'nearest' });
+  }
+
+  // Events
+  searchEl.addEventListener('click', function(){ if (!isOpen) open(); });
+  searchEl.addEventListener('input', function(){ renderList(searchEl.value); });
+  searchEl.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowDown')  { e.preventDefault(); highlight(1); }
+    if (e.key === 'ArrowUp')    { e.preventDefault(); highlight(-1); }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      var opts = dropEl.querySelectorAll('.country-opt');
+      if (highlightIdx >= 0 && opts[highlightIdx]) {
+        opts[highlightIdx].dispatchEvent(new MouseEvent('mousedown'));
+      } else if (filtered[0]) {
+        selectCountry(filtered[0]);
+      }
+    }
+    if (e.key === 'Escape') close();
+  });
+  document.addEventListener('click', function(e){
+    if (isOpen && !document.getElementById('country-wrap').contains(e.target)) close();
+  });
+
+  // Public getter for register
+  function getSelected() { return selected; }
+
+  // Load countries on page ready
+  loadCountries();
+
+  return { getSelected: getSelected };
+})();
+
+// ── Override Auth.register to include country ───────────────────────
+// We patch it after auth.js loads by wrapping the register button
+document.querySelector('.btn-register-s').addEventListener('click', function(e){
+  e.stopImmediatePropagation();
+  var country = CountryPicker.getSelected();
+  if (!country) {
+    // Show warning in country field
+    var searchEl = document.getElementById('country-search');
+    searchEl.style.borderBottomColor = 'rgba(255,50,50,.8)';
+    searchEl.placeholder = '⚠ Please select your country!';
+    setTimeout(function(){
+      searchEl.style.borderBottomColor = '';
+      searchEl.placeholder = 'Search your country...';
+    }, 2000);
+    return;
+  }
+  // Store country in sessionStorage for auth.js / backend
+  sessionStorage.setItem('pw_reg_country', country.name);
+  sessionStorage.setItem('pw_reg_country_code', country.code);
+  sessionStorage.setItem('pw_reg_region', country.region);
+  Auth.register();
+}, true);
 </script>
 </body>
 </html>

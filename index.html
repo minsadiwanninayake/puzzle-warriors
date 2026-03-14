@@ -102,6 +102,10 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font
 .forge-btn.silver:hover { color: rgba(255,255,255,.9); box-shadow: 0 0 0 1px rgba(255,255,255,.3), 0 0 20px rgba(255,255,255,.08); }
 .btn-text { position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 10px; height: 100%; }
 
+/* Mute hint — shown briefly if autoplay is blocked */
+.mute-hint { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 20; font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 4px; color: rgba(255,180,80,.5); pointer-events: none; opacity: 0; transition: opacity .5s; }
+.mute-hint.show { opacity: 1; }
+
 /* Ember particle canvas */
 .side-embers { position: fixed; inset: 0; z-index: 4; pointer-events: none; }
 
@@ -163,6 +167,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font
 <div class="flash" id="flash"></div>
 <div id="toast"></div>
 <canvas class="side-embers" id="ember-canvas"></canvas>
+<div class="mute-hint" id="mute-hint">▶ CLICK ANYWHERE TO ENABLE AUDIO</div>
 
 <div class="stage">
   <div class="title-wrap">
@@ -201,7 +206,6 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font
   </div>
 </div>
 
-<!-- Shared modules (order matters: EventBus first, then dependents) -->
 <script src="shared/eventbus.js"></script>
 <script src="shared/state.js"></script>
 <script src="shared/api.js"></script>
@@ -212,51 +216,88 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font
 <script src="shared/main.js"></script>
 
 <script>
-// ── index.html page logic ─────────────────────────────
-// Keeps page-specific behaviour here, separate from shared modules.
-
-// Redirect logged-in users straight to the menu
 if (State.isLoggedIn()) window.location.href = 'pages/menu.html';
 
-// ── Button handlers (event-driven via EventBus) ───────
+// ── BGM — try immediately, retry on first interaction if blocked ───
+var _bgm = new Audio('shared/battle.mp3');
+_bgm.loop   = true;
+_bgm.volume = 0.35;
 
-document.getElementById('btn-enter').addEventListener('click', () => {
+var _bgmStarted = false;
+var _hint = document.getElementById('mute-hint');
+
+function _startBgm() {
+  if (_bgmStarted) return;
+  _bgm.play().then(function() {
+    _bgmStarted = true;
+    _hint.classList.remove('show');
+  }).catch(function() {
+    // Autoplay blocked — show hint, wait for gesture
+    _hint.classList.add('show');
+  });
+}
+
+// Try on load
+_startBgm();
+
+// Retry on any interaction (covers autoplay-blocked browsers)
+function _onGesture() {
+  if (_bgmStarted) return;
+  _bgm.play().then(function() {
+    _bgmStarted = true;
+    _hint.classList.remove('show');
+    document.removeEventListener('click',     _onGesture);
+    document.removeEventListener('keydown',   _onGesture);
+    document.removeEventListener('touchstart',_onGesture);
+  }).catch(function(){});
+}
+document.addEventListener('click',      _onGesture);
+document.addEventListener('keydown',    _onGesture);
+document.addEventListener('touchstart', _onGesture);
+
+// Mute button sync
+EventBus.on('sfx:toggle', function(){ _bgm.muted = !_bgm.muted; });
+
+// Stop on navigate away
+window.addEventListener('beforeunload', function(){ _bgm.pause(); });
+
+// ── Button handlers ───────────────────────────────────
+document.getElementById('btn-enter').addEventListener('click', function() {
   EventBus.emit('sfx:play', { name: 'transition' });
-  EventBus.emit('sfx:bgStop');
+  _bgm.pause();
   document.getElementById('flash').classList.add('go');
-  setTimeout(() => {
+  setTimeout(function() {
     window.location.href = State.isLoggedIn() ? 'pages/menu.html' : 'pages/auth.html';
   }, 380);
 });
 
-document.getElementById('btn-howto').addEventListener('click', () => {
+document.getElementById('btn-howto').addEventListener('click', function() {
   window.location.href = 'pages/howto.html';
 });
 
-document.getElementById('btn-leaderboard').addEventListener('click', () => {
+document.getElementById('btn-leaderboard').addEventListener('click', function() {
   window.location.href = 'pages/leaderboard.html';
 });
 
 // ── Custom cursor ─────────────────────────────────────
 (function () {
-  const cursor = document.getElementById('cursor');
-  document.addEventListener('mousemove',  e => { cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px'; });
-  document.addEventListener('mousedown',  () => cursor.classList.add('clicking'));
-  document.addEventListener('mouseup',    () => cursor.classList.remove('clicking'));
+  var cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove',  function(e) { cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px'; });
+  document.addEventListener('mousedown',  function() { cursor.classList.add('clicking'); });
+  document.addEventListener('mouseup',    function() { cursor.classList.remove('clicking'); });
 })();
 
 // ── Background canvas — fire particles + lightning ────
 (function () {
-  const canvas = document.getElementById('bg-canvas');
-  const ctx    = canvas.getContext('2d');
-  let W, H, particles = [], lightnings = [], frame = 0;
+  var canvas = document.getElementById('bg-canvas');
+  var ctx    = canvas.getContext('2d');
+  var W, H, particles = [], lightnings = [], frame = 0;
 
   function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
   window.addEventListener('resize', resize);
   resize();
 
-  // Seed fire particles rising from the bottom
-  for (let i = 0; i < 150; i++) {
+  for (var i = 0; i < 150; i++) {
     particles.push({
       x: Math.random() * W, y: H + Math.random() * 200,
       r: Math.random() * 3 + .5,
@@ -266,11 +307,10 @@ document.getElementById('btn-leaderboard').addEventListener('click', () => {
     });
   }
 
-  // Recursive midpoint-displacement lightning bolt
   function makeLightning(x1, y1, x2, y2, depth) {
     if (depth <= 0) return [{ x: x1, y: y1 }, { x: x2, y: y2 }];
-    const mx = (x1 + x2) / 2 + (Math.random() - .5) * (Math.abs(x2 - x1) + Math.abs(y2 - y1)) * .4;
-    const my = (y1 + y2) / 2 + (Math.random() - .5) * (Math.abs(x2 - x1) + Math.abs(y2 - y1)) * .4;
+    var mx = (x1 + x2) / 2 + (Math.random() - .5) * (Math.abs(x2 - x1) + Math.abs(y2 - y1)) * .4;
+    var my = (y1 + y2) / 2 + (Math.random() - .5) * (Math.abs(x2 - x1) + Math.abs(y2 - y1)) * .4;
     return makeLightning(x1, y1, mx, my, depth - 1).concat(makeLightning(mx, my, x2, y2, depth - 1));
   }
 
@@ -288,49 +328,45 @@ document.getElementById('btn-leaderboard').addEventListener('click', () => {
     ctx.clearRect(0, 0, W, H);
     frame++;
 
-    // Radial forge-glow background
-    const bg = ctx.createRadialGradient(W / 2, H, 0, W / 2, H, Math.max(W, H));
+    var bg = ctx.createRadialGradient(W / 2, H, 0, W / 2, H, Math.max(W, H));
     bg.addColorStop(0,  'rgba(80,20,0,.25)');
     bg.addColorStop(.4, 'rgba(40,8,0,.18)');
     bg.addColorStop(1,  'rgba(0,0,0,0)');
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
 
-    // Lava floor glow
-    const floor = ctx.createLinearGradient(0, H - 2, 0, H + 30);
+    var floor = ctx.createLinearGradient(0, H - 2, 0, H + 30);
     floor.addColorStop(0, 'rgba(255,80,0,.6)');
     floor.addColorStop(1, 'rgba(255,40,0,0)');
     ctx.fillStyle = floor;
     ctx.fillRect(0, H - 30, W, 32);
 
-    // Fire particles
-    particles.forEach(p => {
+    particles.forEach(function(p) {
       p.life += .012;
       if (p.life > p.maxLife) {
         p.y = H + Math.random() * 50; p.x = Math.random() * W;
         p.life = 0; p.maxLife = Math.random() * .7 + .3;
       }
-      const prog  = p.life / p.maxLife;
-      const alpha = (prog < .2 ? prog / .2 : prog > .7 ? (1 - prog) / .3 : 1) * .8;
+      var prog  = p.life / p.maxLife;
+      var alpha = (prog < .2 ? prog / .2 : prog > .7 ? (1 - prog) / .3 : 1) * .8;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r * (1 - prog * .5), 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(${p.hue + prog * 20},${90 - prog * 30}%,${70 - prog * 40}%,${alpha})`;
+      ctx.fillStyle = 'hsla(' + (p.hue + prog * 20) + ',' + (90 - prog * 30) + '%,' + (70 - prog * 40) + '%,' + alpha + ')';
       ctx.fill();
       p.x += p.vx + Math.sin(frame * .02 + p.y * .01) * .3;
       p.y += p.vy;
     });
 
-    // Lightning bolts
-    lightnings = lightnings.filter(l => {
+    lightnings = lightnings.filter(function(l) {
       l.life -= l.decay;
       if (l.life <= 0) return false;
-      const a = l.life * .8;
+      var a = l.life * .8;
       ctx.beginPath();
       ctx.moveTo(l.pts[0].x, l.pts[0].y);
-      l.pts.forEach(pt => ctx.lineTo(pt.x, pt.y));
-      ctx.strokeStyle = `rgba(255,180,80,${a * .3})`; ctx.lineWidth = 6; ctx.stroke();
-      ctx.strokeStyle = `rgba(255,230,160,${a})`;     ctx.lineWidth = 1.5; ctx.stroke();
-      ctx.strokeStyle = `rgba(255,255,255,${a * .8})`; ctx.lineWidth = .8; ctx.stroke();
+      l.pts.forEach(function(pt) { ctx.lineTo(pt.x, pt.y); });
+      ctx.strokeStyle = 'rgba(255,180,80,' + (a * .3) + ')'; ctx.lineWidth = 6; ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,230,160,' + a + ')';       ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,' + (a * .8) + ')'; ctx.lineWidth = .8; ctx.stroke();
       return true;
     });
 
@@ -341,15 +377,15 @@ document.getElementById('btn-leaderboard').addEventListener('click', () => {
 
 // ── Ember particle canvas ─────────────────────────────
 (function () {
-  const canvas = document.getElementById('ember-canvas');
-  const ctx    = canvas.getContext('2d');
-  let W, H, embers = [], mx = -1, my = -1;
+  var canvas = document.getElementById('ember-canvas');
+  var ctx    = canvas.getContext('2d');
+  var W, H, embers = [], mx = -1, my = -1;
 
   function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
   window.addEventListener('resize', resize);
   resize();
 
-  for (let i = 0; i < 60; i++) {
+  for (var i = 0; i < 60; i++) {
     embers.push({
       x: Math.random() * W, y: H + Math.random() * H,
       vx: (Math.random() - .5) * .8, vy: -(Math.random() * 1.5 + .5),
@@ -358,29 +394,27 @@ document.getElementById('btn-leaderboard').addEventListener('click', () => {
     });
   }
 
-  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  document.addEventListener('mousemove', function(e) { mx = e.clientX; my = e.clientY; });
 
   function draw() {
     ctx.clearRect(0, 0, W, H);
-    embers.forEach(e => {
+    embers.forEach(function(e) {
       e.alpha -= .004;
       if (e.alpha <= 0) { e.x = Math.random() * W; e.y = H + 10; e.alpha = .6 + Math.random() * .4; }
-      // Mouse wind repulsion
       if (mx >= 0) {
-        const dx = e.x - mx, dy = e.y - my, d = Math.sqrt(dx * dx + dy * dy);
+        var dx = e.x - mx, dy = e.y - my, d = Math.sqrt(dx * dx + dy * dy);
         if (d < 120) { e.vx += dx / d * .05; e.vy += dy / d * .02; }
       }
       e.x += e.vx; e.y += e.vy; e.vx *= .99;
       ctx.beginPath();
       ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${e.color},${e.alpha})`;
+      ctx.fillStyle = 'rgba(' + e.color + ',' + e.alpha + ')';
       ctx.fill();
-      // Star-sparkle on larger embers
       if (e.r > 1.2 && e.alpha > .3) {
         ctx.beginPath();
         ctx.moveTo(e.x - e.r * 3, e.y); ctx.lineTo(e.x + e.r * 3, e.y);
         ctx.moveTo(e.x, e.y - e.r * 3); ctx.lineTo(e.x, e.y + e.r * 3);
-        ctx.strokeStyle = `rgba(${e.color},${e.alpha * .5})`;
+        ctx.strokeStyle = 'rgba(' + e.color + ',' + (e.alpha * .5) + ')';
         ctx.lineWidth = .5; ctx.stroke();
       }
     });
