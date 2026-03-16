@@ -135,7 +135,7 @@ html{overflow-y:auto;}body{overflow-x:hidden;}
         </div>
         <button class="btn-submit btn-login-s" onclick="Auth.login()">
           <div class="sweep"></div>
-          <span style="position:relative;z-index:1;">LOGIN →</span>
+          <span style="position:relative;z-index:1;">LOGIN →</span> 
         </button>
       </div>
 
@@ -278,7 +278,7 @@ var CountryPicker = (function() {
     if (loadEl) { loadEl.textContent = msg; loadEl.style.display = 'block'; }
   }
 
-  // API 1 — restcountries.com v3.1 (most detailed)
+  // Country API
   function apiRestV3() {
     return fetch('https://restcountries.com/v3.1/all?fields=name,cca2,region')
       .then(function(r) { if (!r.ok) throw new Error('v3 status ' + r.status); return r.json(); })
@@ -290,7 +290,7 @@ var CountryPicker = (function() {
       });
   }
 
-  // API 2 — restcountries.com v2 (older fallback endpoint)
+  // restcountries.com v2 (older fallback endpoint)
   function apiRestV2() {
     return fetch('https://restcountries.com/v2/all?fields=name,alpha2Code,region')
       .then(function(r) { if (!r.ok) throw new Error('v2 status ' + r.status); return r.json(); })
@@ -302,7 +302,7 @@ var CountryPicker = (function() {
       });
   }
 
-  // API 3 — countriesnow.space (completely different source)
+  //  countriesnow.space (completely different source)
   function apiCountriesNow() {
     return fetch('https://countriesnow.space/api/v0.1/countries/iso')
       .then(function(r) { if (!r.ok) throw new Error('countrynow status ' + r.status); return r.json(); })

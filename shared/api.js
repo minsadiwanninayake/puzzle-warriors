@@ -26,7 +26,7 @@ const API = (function () {
       });
     },
     getMe()             { return req('GET',  '/api/auth/me'); },
-    getPuzzle()         { return req('GET',  '/api/game/puzzle'); },
+    getPuzzle()         { return req('GET',  '/api/game/puzzle'); },// Heart Game API
     postResult(payload) { return req('POST', '/api/game/result', payload); },
     getLeaderboard()    { return req('GET',  '/api/game/leaderboard'); },
   };

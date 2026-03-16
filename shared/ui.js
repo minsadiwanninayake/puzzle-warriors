@@ -225,7 +225,7 @@ const UI = (function () {
     if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
   }
 
-  // ── Init — safe to call on every page ────────────────
+  // 0-9, a-A, d-D, m-M
   function init() {
     // Toast works on every page
     EventBus.on('ui:toast', function(d) { showToast(d.message); });

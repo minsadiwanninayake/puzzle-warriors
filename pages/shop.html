@@ -210,6 +210,7 @@ function refreshUI(){var coins=readCoins(),inv=readInv();document.getElementById
 
 function buyItem(type){var price=PRICES[type];var coins=readCoins();if(coins<price){showToast('✗ NOT ENOUGH COINS — NEED '+price);return;}writeCoins(coins-price);var inv=readInv();inv[type]=(inv[type]||0)+1;writeInv(inv);var card=document.getElementById('card-'+type);card.classList.add('buy-success');setTimeout(function(){card.classList.remove('buy-success');},500);doBurst(document.getElementById('buy-'+type));var names={shield:'Iron Shield',rage:'Fury Boost',heal:'Healing Potion',freeze:'Ice Blast'};showToast('✦ '+names[type].toUpperCase()+' ACQUIRED!');EventBus.emit('sfx:play',{name:'coin'});refreshUI();}
 
+//Buy buttons
 document.getElementById('buy-shield').addEventListener('click',function(){buyItem('shield');});
 document.getElementById('buy-rage').addEventListener('click',function(){buyItem('rage');});
 document.getElementById('buy-heal').addEventListener('click',function(){buyItem('heal');});

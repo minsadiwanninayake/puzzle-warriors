@@ -295,7 +295,8 @@ const BattleEngine = (function () {
     writeInv(inv);
 
     EventBus.emit('sfx:play', { name: 'powerUp' });
-
+    
+    //new features
     if (type === 'shield') {
       battle.shieldActive = true;
       EventBus.emit('battle:log', { message: '🛡 IRON SHIELD activated! Next hit blocked!' });
